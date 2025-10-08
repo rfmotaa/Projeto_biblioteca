@@ -14,9 +14,7 @@ Projeto_Biblioteca/
 │   │   │   │       ├── model/           # Entidades JPA/Hibernate
 │   │   │   │       └── config/          # Configurações do Spring Boot
 │   │   │   └── resources/
-│   │   │       ├── application.properties  # Configuração do Spring Boot
-│   │   │       └── db/                     # Scripts SQL iniciais (opcional)
-│   │   └── test/                             # Testes unitários e de integração
+│   │           └── application.properties  # Configuração do Spring Boot
 │   ├── pom.xml                               # Dependências Maven
 │   └── .gitignore
 │

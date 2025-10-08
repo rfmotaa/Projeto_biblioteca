@@ -19,6 +19,15 @@ public class Funcionario {
     private String login;
     private String senha;
 
+    public  Funcionario() {
+    }
+
+    public Funcionario(String nome, String login, String senha) {
+        this.nome = nome;
+        this.login = login;
+        this.senha = senha;
+    }
+
     // Getters e Setters
     public Long getId() {return id;}
     public void setId(Long id) {this.id = id;}
@@ -29,8 +38,16 @@ public class Funcionario {
     public String getLogin() {return login;}
     public void setLogin(String login) {this.login = login;}
 
+    public String getSenha() {return senha;}
+    public void setSenha(String senha) {this.senha = senha;}
+
     // Métodos
     public boolean verificarSenha(String tentativa) {
         return senha != null && senha.equals(tentativa);
+    }
+
+    @Override
+    public String toString() {
+        return "Funcionario{id=" + id + ", nome='" + nome + "', login='" + login + "'}";
     }
 }
