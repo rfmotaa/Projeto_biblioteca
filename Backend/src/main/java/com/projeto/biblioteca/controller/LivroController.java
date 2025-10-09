@@ -25,17 +25,17 @@ public class LivroController {
     }
 
     @GetMapping("/{id}")
-    public Livro buscarPorId(@PathVariable Long id) {
+    public Livro buscarPorId(@PathVariable Integer id) {
         return livroService.buscarPorId(id);
     }
 
     @PutMapping("/{id}")
-    public Livro atualizar(@PathVariable Long id, @RequestBody Livro livroAtualizado) {
+    public Livro atualizar(@PathVariable Integer id, @RequestBody Livro livroAtualizado) {
         return livroService.salvar(id, livroAtualizado);
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id) {
+    public void deletar(@PathVariable Integer id) {
         livroService.deletar(id);
     }
 

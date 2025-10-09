@@ -60,7 +60,7 @@ public class FuncionarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Funcionario> getFuncionarioById(@PathVariable Long id) {
+    public ResponseEntity<Funcionario> getFuncionarioById(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(funcionarioService.buscarPorId(id));
         } catch (RuntimeException e) {
@@ -69,12 +69,12 @@ public class FuncionarioController {
     }
 
     @PutMapping("/{id}")
-    public Funcionario putFuncionario(@PathVariable Long id, @RequestBody Funcionario funcionario) {
+    public Funcionario putFuncionario(@PathVariable Integer id, @RequestBody Funcionario funcionario) {
         return funcionarioService.salvar(id, funcionario);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFuncionario(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteFuncionario(@PathVariable Integer id) {
         try {
             funcionarioService.deletar(id);
             return ResponseEntity.noContent().build();

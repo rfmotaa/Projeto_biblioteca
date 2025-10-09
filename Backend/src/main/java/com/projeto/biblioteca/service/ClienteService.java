@@ -29,12 +29,12 @@ public class ClienteService {
         return clienteRepository.findAll();
     }
 
-    public Cliente buscarPorId(Long id) {
+    public Cliente buscarPorId(Integer id) {
         return clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
     }
 
-    public Cliente salvar(Long id, Cliente clienteAtualizado) {
+    public Cliente salvar(Integer id, Cliente clienteAtualizado) {
         Cliente clienteExistente = buscarPorId(id);
 
         if (!clienteExistente.getEmail().equals(clienteAtualizado.getEmail())
@@ -44,13 +44,13 @@ public class ClienteService {
 
         clienteExistente.setNome(clienteAtualizado.getNome());
         clienteExistente.setEmail(clienteAtualizado.getEmail());
-        clienteExistente.setSenha(clienteAtualizado.getSenha());
+        clienteExistente.setSenhaHash(clienteAtualizado.getSenhaHash());
         clienteExistente.setStatus(clienteAtualizado.getStatus());
 
         return clienteRepository.save(clienteExistente);
     }
 
-    public void deletar(Long id) {
+    public void deletar(Integer id) {
         clienteRepository.deleteById(id);
     }
 

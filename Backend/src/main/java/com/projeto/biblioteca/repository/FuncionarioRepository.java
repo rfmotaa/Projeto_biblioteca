@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface FuncionarioRepository extends JpaRepository<Funcionario, Long>{
+public interface FuncionarioRepository extends JpaRepository<Funcionario, Integer>{
 
     Optional<Funcionario> findByLogin(String login);
     boolean existsByLogin(String login);

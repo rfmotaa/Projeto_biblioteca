@@ -29,12 +29,12 @@ public class FuncionarioService {
         return funcionarioRepository.findAll();
     }
 
-    public Funcionario buscarPorId(Long id) {
+    public Funcionario buscarPorId(Integer id) {
         return funcionarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Funcionário não encontrado."));
     }
 
-    public Funcionario salvar(Long id, Funcionario funcionarioAtualizado) {
+    public Funcionario salvar(Integer id, Funcionario funcionarioAtualizado) {
         Funcionario funcionarioExistente = buscarPorId(id);
 
         if (!funcionarioExistente.getLogin().equals(funcionarioAtualizado.getLogin())
@@ -44,12 +44,12 @@ public class FuncionarioService {
 
         funcionarioExistente.setNome(funcionarioAtualizado.getNome());
         funcionarioExistente.setLogin(funcionarioAtualizado.getLogin());
-        funcionarioExistente.setSenha(funcionarioAtualizado.getSenha());
+        funcionarioExistente.setSenhaHash(funcionarioAtualizado.getSenhaHash());
 
         return funcionarioRepository.save(funcionarioExistente);
     }
 
-    public void deletar(Long id) {
+    public void deletar(Integer id) {
         funcionarioRepository.deleteById(id);
     }
 }

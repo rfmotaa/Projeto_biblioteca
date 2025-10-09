@@ -25,27 +25,27 @@ public class EmprestimoController {
     }
 
     @GetMapping("/{id}")
-    public Emprestimo buscarPorId(@PathVariable Long id) {
+    public Emprestimo buscarPorId(@PathVariable Integer id) {
         return emprestimoService.buscarPorId(id);
     }
 
     @PutMapping("/{id}")
-    public Emprestimo atualizarEmprestimo(@PathVariable Long id, @RequestBody Emprestimo emprestimoAtualizado) {
+    public Emprestimo atualizarEmprestimo(@PathVariable Integer id, @RequestBody Emprestimo emprestimoAtualizado) {
         return emprestimoService.salvar(id, emprestimoAtualizado);
     }
 
     @PatchMapping("/{id}/devolucao")
-    public Emprestimo registrarDevolucao(@PathVariable Long id) {
+    public Emprestimo registrarDevolucao(@PathVariable Integer id) {
         return emprestimoService.registrarDevolucao(id);
     }
 
     @PatchMapping("/{id}/renovacao")
-    public Emprestimo renovarEmprestimo(@PathVariable Long id) {
+    public Emprestimo renovarEmprestimo(@PathVariable Integer id) {
         return emprestimoService.renovar(id);
     }
 
     @DeleteMapping("/{id}")
-    public void deletarEmprestimo(@PathVariable Long id) {
+    public void deletarEmprestimo(@PathVariable Integer id) {
         emprestimoService.deletar(id);
     }
 }

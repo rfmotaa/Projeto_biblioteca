@@ -40,17 +40,17 @@ public class ClienteController {
     }
 
     @GetMapping("/{id}")
-    public Cliente getClienteById(@PathVariable Long id) {
+    public Cliente getClienteById(@PathVariable Integer id) {
         return clienteService.buscarPorId(id);
     }
 
     @PutMapping("/{id}")
-    public Cliente putCliente(@PathVariable Long id, @RequestBody Cliente cliente) {
+    public Cliente putCliente(@PathVariable Integer id, @RequestBody Cliente cliente) {
         return clienteService.salvar(id, cliente);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteCliente(@PathVariable Long id) {
+    public String deleteCliente(@PathVariable Integer id) {
         clienteService.deletar(id);
         return "Cliente removido com sucesso.";
     }

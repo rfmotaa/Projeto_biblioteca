@@ -40,7 +40,7 @@ public class EmprestimoService {
         e.setDataRetirada(LocalDate.now());
         e.setDataRetornoPrevisto(LocalDate.now().plusDays(7));
 
-        livro.emprestar(e);
+        livro.emprestar();
         livroRepository.save(livro);
 
         return emprestimoRepository.save(e);
@@ -50,12 +50,12 @@ public class EmprestimoService {
         return emprestimoRepository.findAll();
     }
 
-    public Emprestimo buscarPorId(Long id) {
+    public Emprestimo buscarPorId(Integer id) {
         return emprestimoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Empréstimo não encontrado."));
     }
 
-    public Emprestimo salvar(Long id, Emprestimo emprestimoAtualizado) {
+    public Emprestimo salvar(Integer id, Emprestimo emprestimoAtualizado) {
         Emprestimo emprestimoExistente = buscarPorId(id);
 
         Cliente cliente = clienteRepository.findById(emprestimoAtualizado.getCliente().getId())
@@ -72,7 +72,7 @@ public class EmprestimoService {
         return emprestimoRepository.save(emprestimoExistente);
     }
 
-    public Emprestimo registrarDevolucao(Long id) {
+    public Emprestimo registrarDevolucao(Integer id) {
         Emprestimo emprestimo = buscarPorId(id);
 
         if (emprestimo.getDataRetornoOficial() != null) {
@@ -87,13 +87,13 @@ public class EmprestimoService {
         return emprestimoRepository.save(emprestimo);
     }
 
-    public Emprestimo renovar(Long id) {
+    public Emprestimo renovar(Integer id) {
         Emprestimo emprestimo = buscarPorId(id);
         emprestimo.renovacao();
         return emprestimoRepository.save(emprestimo);
     }
 
-    public void deletar(Long id) {
+    public void deletar(Integer id) {
         Emprestimo emprestimo = buscarPorId(id);
         if (emprestimo.getDataRetornoOficial() == null) {
             Livro livro = emprestimo.getLivro();

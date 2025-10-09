@@ -21,12 +21,12 @@ public class LivroService {
         return livroRepository.findAll();
     }
 
-    public Livro buscarPorId(Long id) {
+    public Livro buscarPorId(Integer id) {
         return livroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado."));
     }
 
-    public Livro salvar(Long id, Livro livroAtualizado) {
+    public Livro salvar(Integer id, Livro livroAtualizado) {
         Livro livroExistente = buscarPorId(id);
 
         livroExistente.setTitulo(livroAtualizado.getTitulo());
@@ -37,7 +37,7 @@ public class LivroService {
         return livroRepository.save(livroExistente);
     }
 
-    public void deletar(Long id) {
+    public void deletar(Integer id) {
         Livro livro = buscarPorId(id);
         boolean possuiEmprestimosAtivos = livro.getEmprestimos().stream()
                 .anyMatch(e -> e.getDataRetornoOficial() == null);
