@@ -49,6 +49,12 @@ public class Cliente {
     public String getEmail() {return email;}
     public void setEmail(String email) {this.email = email;}
 
+    public String getSenha() { return senha; }
+    public void setSenha(String senha) { this.senha = senha; }
+
+    public StatusCliente getStatus() { return status; }
+    public void setStatus(StatusCliente status) { this.status = status; }
+
     public List<Emprestimo> getEmprestimos() {return emprestimos;}
 
     // Métodos
@@ -63,5 +69,9 @@ public class Cliente {
 
     public void devolverEmprestimo(Emprestimo emprestimo) {
         emprestimo.getLivro().devolver();
+    }
+
+    public boolean verificarSenha(String tentativa) {
+        return senha != null && senha.equals(tentativa);
     }
 }

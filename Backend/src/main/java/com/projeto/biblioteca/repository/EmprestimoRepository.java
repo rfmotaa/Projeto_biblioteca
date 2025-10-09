@@ -8,11 +8,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface EmpresetimoRepository extends JpaRepository<Emprestimo, Long> {
-    List<Emprestimo> findByStatus(String status);
+public interface EmprestimoRepository extends JpaRepository<Emprestimo, Long> {
     List<Emprestimo> findByClienteId(Long clienteId);
     List<Emprestimo> findByLivroId(Long livroId);
-    List<Emprestimo> findByDataEmprestimoBetween(LocalDate inicio, LocalDate fim);
-    List<Emprestimo> findByDataDevolucaoPrevistaBefore(LocalDate data);
-    List<Emprestimo> findByDataDevolucaoRealIsNull();
+    List<Emprestimo> findByDataRetiradaBetween(LocalDate inicio, LocalDate fim);
+    List<Emprestimo> findByDataRetornoPrevistoBefore(LocalDate data);
+    List<Emprestimo> findByDataRetornoOficialIsNull();
 }

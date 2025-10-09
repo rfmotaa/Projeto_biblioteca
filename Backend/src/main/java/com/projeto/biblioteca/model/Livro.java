@@ -1,7 +1,6 @@
 package com.projeto.biblioteca.model;
 
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,20 +13,26 @@ public class Livro {
     private Long id;
 
     private String titulo;
-    private int ano_publicacao;
-    private int qnt_total;
-    private int qnt_disponivel;
+
+    @Column(name = "ano_publicacao")
+    private int anoPublicacao;
+
+    @Column(name = "qnt_total")
+    private int quantidadeTotal;
+
+    @Column(name = "qnt_disponivel")
+    private int quantidadeDisponivel;
 
     @OneToMany(mappedBy = "livro", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Emprestimo> emprestimos = new ArrayList<>();
 
     public Livro() {}
 
-    public Livro(String titulo, int ano_publicacao, int qnt_total, int qnt_disponivel) {
+    public Livro(String titulo, int anoPublicacao, int quantidadeTotal, int quantidadeDisponivel) {
         this.titulo = titulo;
-        this.ano_publicacao = ano_publicacao;
-        this.qnt_total = qnt_total;
-        this.qnt_disponivel = qnt_disponivel;
+        this.anoPublicacao = anoPublicacao;
+        this.quantidadeTotal = quantidadeTotal;
+        this.quantidadeDisponivel = quantidadeDisponivel;
     }
 
     // Getters e Setters
@@ -37,35 +42,34 @@ public class Livro {
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
 
-    public int getAnoPublicacao() { return ano_publicacao; }
-    public void setAnoPublicacao(int ano_publicacao) { this.ano_publicacao = ano_publicacao; }
+    public int getAnoPublicacao() { return anoPublicacao; }
+    public void setAnoPublicacao(int anoPublicacao) { this.anoPublicacao = anoPublicacao; }
 
-    public int getQntTotal() { return qnt_total; }
-    public void setQntTotal(int qnt_total) { this.qnt_total = qnt_total; }
+    public int getQntTotal() { return quantidadeTotal; }
+    public void setQntTotal(int quantidadeTotal) { this.quantidadeTotal = quantidadeTotal; }
 
-    public int getQntDisponivel() { return qnt_disponivel; }
-    public void setQntDisponivel(int qnt_disponivel) { this.qnt_disponivel = qnt_disponivel; }
+    public int getQntDisponivel() { return quantidadeDisponivel; }
+    public void setQntDisponivel(int quantidadeDisponivel) { this.quantidadeDisponivel = quantidadeDisponivel; }
 
     public List<Emprestimo> getEmprestimos() { return emprestimos; }
 
-    // Métodos
+    // Métodos de negócio
     public void emprestar(Emprestimo emprestimo) {
-        if (disponivel()) {
-            emprestimos.add(emprestimo);
-            qnt_disponivel--;
-        } else {
-            throw new IllegalStateException();
+        if (!disponivel()) {
+            throw new IllegalStateException("Livro indisponível para empréstimo.");
         }
+        emprestimos.add(emprestimo);
+        quantidadeDisponivel--;
     }
 
     public void devolver() {
-        if (qnt_disponivel >= qnt_total) {
-            throw new IllegalStateException();
+        if (quantidadeDisponivel >= quantidadeTotal) {
+            throw new IllegalStateException("Não há livros emprestados para devolver.");
         }
-        qnt_disponivel++;
+        quantidadeDisponivel++;
     }
 
     public boolean disponivel() {
-        return qnt_disponivel > 0;
+        return quantidadeDisponivel > 0;
     }
 }

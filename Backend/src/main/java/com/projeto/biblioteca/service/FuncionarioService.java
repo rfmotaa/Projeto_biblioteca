@@ -14,9 +14,14 @@ public class FuncionarioService {
     FuncionarioRepository funcionarioRepository;
 
     public Funcionario criar(Funcionario f) {
-        if (existe(f)) {
-            throw new RuntimeException("Login já está em uso.");
+        if (funcionarioRepository.existsById(f.getId())) {
+            throw new RuntimeException("Funcionário já cadastrado");
         }
+
+        if (funcionarioRepository.findByLogin(f.getLogin()).isPresent()) {
+            throw  new RuntimeException("Login já está em uso.");
+        }
+
         return funcionarioRepository.save(f);
     }
 
@@ -27,10 +32,6 @@ public class FuncionarioService {
     public Funcionario buscarPorId(Long id) {
         return funcionarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Funcionário não encontrado."));
-    }
-
-    public boolean existe(Funcionario f) {
-        return funcionarioRepository.existsByLogin(f.getLogin());
     }
 
     public Funcionario salvar(Long id, Funcionario funcionarioAtualizado) {
