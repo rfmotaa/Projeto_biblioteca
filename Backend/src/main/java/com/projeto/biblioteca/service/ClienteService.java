@@ -14,10 +14,6 @@ public class ClienteService {
     private ClienteRepository clienteRepository;
 
     public Cliente criar(Cliente cliente) {
-        if (clienteRepository.existsById(cliente.getId())) {
-            throw new RuntimeException("Cliente já cadastrado.");
-        }
-
         if (clienteRepository.findByEmail(cliente.getEmail()).isPresent()) {
             throw new RuntimeException("Email já está em uso.");
         }

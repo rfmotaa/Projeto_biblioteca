@@ -26,7 +26,7 @@ public class Cliente {
     @Column(nullable = false, length = 127, unique = true)
     private String email;
 
-    @Column(name = "senha_hash", nullable = false, length = 45, unique = true)
+    @Column(name = "senha_hash", nullable = false, length = 45)
     private String senhaHash;
 
     @Enumerated(EnumType.STRING)

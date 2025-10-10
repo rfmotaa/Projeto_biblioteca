@@ -23,7 +23,7 @@ public class Livro {
     private Short qntTotal = 1;
 
     @Column(name = "qnt_disponivel", nullable = false)
-    private Short qntDisponivel = 1;
+    private Short qntDisponivel;
 
     @OneToMany(mappedBy = "livro", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Emprestimo> emprestimos = new ArrayList<>();

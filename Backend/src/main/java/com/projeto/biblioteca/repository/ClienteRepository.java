@@ -10,11 +10,11 @@ import java.util.Optional;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
 
-    Optional<Cliente> findByEmailAndSenha(String email, String senha);
+    Optional<Cliente> findByEmailAndSenhaHash(String email, String senha);
     Optional<Cliente> findByEmail(String email);
     List<Cliente> findByStatus(Cliente.StatusCliente status);
     List<Cliente> findByNomeContainingIgnoreCase(String nome);
 
-    @Query("SELECT c FROM Cliente c JOIN c.emprestimo e WHERE e.dataRetornoOficial IS NULL")
+    @Query("SELECT c FROM Cliente c JOIN c.emprestimos e WHERE e.dataRetornoOficial IS NULL")
     List<Cliente> findClientesComEmprestimosEmAberto();
 }

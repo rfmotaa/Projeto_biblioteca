@@ -60,8 +60,8 @@ public class ClienteController {
         return clienteService.buscarPorStatus(status);
     }
 
-    @GetMapping("/nome/{nome}")
-    public List<Cliente> getByNome(@PathVariable String nome) {
+    @GetMapping("/nome")
+    public List<Cliente> getByNome(@RequestParam String nome) {
         return clienteService.buscarPorNome(nome);
     }
 

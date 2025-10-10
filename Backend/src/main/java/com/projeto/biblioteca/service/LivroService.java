@@ -14,6 +14,10 @@ public class LivroService {
     private LivroRepository livroRepository;
 
     public Livro criar(Livro livro) {
+        if (livro.getQntDisponivel() > livro.getQntTotal()) {
+            throw new RuntimeException("Quantidade disponível não pode ser maior que a quantidade total.");
+        }
+
         return livroRepository.save(livro);
     }
 
@@ -27,6 +31,10 @@ public class LivroService {
     }
 
     public Livro salvar(Integer id, Livro livroAtualizado) {
+        if (livroAtualizado.getQntDisponivel() > livroAtualizado.getQntTotal()) {
+            throw new RuntimeException("Quantidade disponível não pode ser maior que a quantidade total.");
+        }
+
         Livro livroExistente = buscarPorId(id);
 
         livroExistente.setTitulo(livroAtualizado.getTitulo());
