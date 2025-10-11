@@ -14,10 +14,6 @@ public class FuncionarioService {
     FuncionarioRepository funcionarioRepository;
 
     public Funcionario criar(Funcionario f) {
-        if (funcionarioRepository.existsById(f.getId())) {
-            throw new RuntimeException("Funcionário já cadastrado");
-        }
-
         if (funcionarioRepository.findByLogin(f.getLogin()).isPresent()) {
             throw  new RuntimeException("Login já está em uso.");
         }

@@ -22,7 +22,10 @@ public class FuncionarioController {
     SistemaLoginService sistemaLoginService;
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestParam String login, @RequestParam String senha) {
+    public Map<String, String> login(@RequestBody Map<String, String> credenciais) {
+        String login = credenciais.get("login");
+        String senha = credenciais.get("senha");
+
         Map<String, String> resp = new HashMap<>();
         if (sistemaLoginService.autenticar(login, senha)) {
             resp.put("status", "sucesso");

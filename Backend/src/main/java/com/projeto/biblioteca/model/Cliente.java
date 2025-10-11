@@ -1,5 +1,8 @@
 package com.projeto.biblioteca.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -8,6 +11,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "cliente")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class Cliente {
 
     public enum StatusCliente {
