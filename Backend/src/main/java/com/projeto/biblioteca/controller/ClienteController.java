@@ -79,6 +79,11 @@ public class ClienteController {
         return clienteService.buscarPorNome(nome);
     }
 
+    @GetMapping("/email")
+    public Cliente getByEmail(@RequestParam String email) {
+        return clienteService.buscarPorEmail(email);
+    }
+
     @GetMapping("/emprestimos/abertos")
     public List<Cliente> getClientesComEmprestimosAbertos() {
         return clienteService.buscarComEmprestimosEmAberto();

@@ -30,6 +30,11 @@ public class ClienteService {
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
     }
 
+    public Cliente buscarPorEmail(String email) {
+        return clienteRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+    }
+
     public Cliente salvar(Integer id, Cliente clienteAtualizado) {
         Cliente clienteExistente = buscarPorId(id);
 

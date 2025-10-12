@@ -13,8 +13,8 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // permite todas as rotas
-                        .allowedOrigins("http://localhost:3000") // frontend
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:5173") // porta do Vite
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowCredentials(true);
             }
