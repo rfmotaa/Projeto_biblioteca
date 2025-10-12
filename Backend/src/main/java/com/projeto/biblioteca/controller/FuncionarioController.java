@@ -27,7 +27,7 @@ public class FuncionarioController {
         String senha = credenciais.get("senha");
 
         Map<String, String> resp = new HashMap<>();
-        if (sistemaLoginService.autenticar(login, senha)) {
+        if (sistemaLoginService.autenticarFuncionario(login, senha)) {
             resp.put("status", "sucesso");
             resp.put("mensagem", "Login realizado com sucesso");
         } else {
@@ -39,7 +39,7 @@ public class FuncionarioController {
 
     @PostMapping("/logout")
     public String logout() {
-        sistemaLoginService.logout();
+        sistemaLoginService.logoutFuncionario();
         return "Logout realizado com sucesso.";
     }
 

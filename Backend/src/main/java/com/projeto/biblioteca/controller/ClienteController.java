@@ -2,31 +2,45 @@ package com.projeto.biblioteca.controller;
 
 import com.projeto.biblioteca.model.Cliente;
 import com.projeto.biblioteca.service.ClienteService;
+import com.projeto.biblioteca.service.SistemaLoginService;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {
 
     @Autowired
-    private ClienteService clienteService;
+    ClienteService clienteService;
+    @Autowired
+    SistemaLoginService sistemaLoginService;
 
     @PostMapping("/login")
-    public String login(@RequestParam String email, @RequestParam String senha) {
-        Cliente cliente = clienteService
-                .listarTodos()
-                .stream()
-                .filter(c -> c.getEmail().equals(email) && c.verificarSenha(senha))
-                .findFirst()
-                .orElse(null);
+    public Map<String, String> login(@RequestBody Map<String, String> credenciais) {
+        String email = credenciais.get("email");
+        String senha = credenciais.get("senha");
 
-        if (cliente != null) {
-            return "Login realizado com sucesso para: " + cliente.getNome();
+        Map<String, String> resp = new HashMap<>();
+        if (sistemaLoginService.autenticarCliente(email, senha)) {
+            resp.put("status", "sucesso");
+            resp.put("mensagem", "Login realizado com sucesso");
+        } else {
+            resp.put("status", "erro");
+            resp.put("mensagem", "Login ou senha incorretos");
         }
-        return "Email ou senha incorretos.";
+        return resp;
+    }
+
+    @PostMapping("/logout")
+    public String logout() {
+        sistemaLoginService.logoutCliente();
+        return "Logout realizado com sucesso";
     }
 
     @GetMapping

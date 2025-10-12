@@ -43,3 +43,16 @@ Projeto_Biblioteca/
 ├── .gitignore              # Ignorar arquivos gerais
 └── README.md               # Descrição geral do projeto
 ```
+
+Como rodar o backend
+
+```
+cd Backend
+mvn spring-boot:run
+```
+
+Como rodar o frontend
+
+```
+
+```
