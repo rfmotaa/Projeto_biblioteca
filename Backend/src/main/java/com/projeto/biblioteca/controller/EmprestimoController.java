@@ -1,9 +1,15 @@
 package com.projeto.biblioteca.controller;
 
+import com.projeto.biblioteca.dto.ClienteDTO;
+import com.projeto.biblioteca.dto.EmprestimoDTO;
+import com.projeto.biblioteca.dto.LivroDTO;
+import com.projeto.biblioteca.model.Cliente;
 import com.projeto.biblioteca.model.Emprestimo;
+import com.projeto.biblioteca.model.Livro;
 import com.projeto.biblioteca.service.EmprestimoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.stream.Collectors;
 
 import java.util.List;
 
@@ -20,8 +26,45 @@ public class EmprestimoController {
     }
 
     @GetMapping
-    public List<Emprestimo> listarTodos() {
-        return emprestimoService.listarTodos();
+    public List<EmprestimoDTO> listarTodos() {
+        List<Emprestimo> emprestimos = emprestimoService.listarTodos();
+
+        return emprestimos.stream().map(e -> {
+            Cliente c = e.getCliente();
+            Livro l = e.getLivro();
+
+            ClienteDTO clienteDTO = new ClienteDTO(
+                    c.getId(),
+                    c.getNome(),
+                    c.getEmail(),
+                    c.getStatus(),
+                    c.getEmprestimos()
+                            .stream()
+                            .map(Emprestimo::getId)
+                            .collect(Collectors.toList())
+            );
+
+            LivroDTO livroDTO = new LivroDTO(
+                    l.getId(),
+                    l.getTitulo(),
+                    l.getAnoPublicacao(),
+                    l.getQntTotal(),
+                    l.getQntDisponivel(),
+                    l.getEmprestimos()
+                            .stream()
+                            .map(Emprestimo::getId)
+                            .collect(Collectors.toList())
+            );
+
+            return new EmprestimoDTO(
+                    e.getId(),
+                    e.getDataRetirada(),
+                    e.getDataRetornoPrevisto(),
+                    e.getDataRetornoOficial(),
+                    clienteDTO,
+                    livroDTO
+            );
+        }).collect(Collectors.toList()); 
     }
 
     @GetMapping("/{id}")

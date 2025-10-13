@@ -26,11 +26,13 @@ const ClienteDashboard = () => {
             ]);
 
             setLivrosDisponiveis(livrosRes.data);
-            
             const emprestimosDoCliente = emprestimosRes.data.filter(
-                (emp) => emp.cliente.id_cliente === clienteId && emp.data_retorno_oficial === null
+                (emp) => emp.cliente.id === clienteId && emp.dataRetornoOficial === null
             );
+
             setMeusEmprestimos(emprestimosDoCliente);
+            console.log("Empréstimos recebidos:", emprestimosRes.data);
+            console.log("Empréstimos filtrados:", emprestimosDoCliente);
 
         } catch (error) {
             console.error("Erro ao buscar dados do cliente:", error);
@@ -43,7 +45,7 @@ const ClienteDashboard = () => {
         const clienteData = JSON.parse(localStorage.getItem('clienteLogado'));
         if (clienteData) {
             setCliente(clienteData);
-            fetchDados(clienteData.id_cliente);
+            fetchDados(clienteData.id);
         } else {
             navigate('/');
         }
@@ -57,34 +59,28 @@ const ClienteDashboard = () => {
     const handleDevolver = async (emprestimoId) => {
         if(window.confirm('Tem certeza que deseja registrar a devolução deste livro?')) {
             await api.patch(`/emprestimos/${emprestimoId}/devolucao`);
-            fetchDados(cliente.id_cliente);
+            fetchDados(cliente.id);
         }
     };
 
     const handleRenovar = async (emprestimoId) => {
-         if(window.confirm('Tem certeza que deseja renovar este empréstimo?')) {
+        if(window.confirm('Tem certeza que deseja renovar este empréstimo?')) {
             await api.patch(`/emprestimos/${emprestimoId}/renovacao`);
-            fetchDados(cliente.id_cliente);
+            fetchDados(cliente.id);
         }
     };
 
     const handleSolicitarEmprestimo = async (livroId) => {
         if(window.confirm('Confirmar a solicitação de empréstimo deste livro?')) {
             try {
-                const hoje = new Date();
-                const dataRetorno = new Date();
-                dataRetorno.setDate(hoje.getDate() + 14); 
-
                 const novoEmprestimo = {
-                    cliente: { id_cliente: cliente.id_cliente },
-                    livro: { id_livro: livroId },
-                    data_retirada: hoje.toISOString().split('T')[0],
-                    data_retorno_previsto: dataRetorno.toISOString().split('T')[0],
+                    cliente: { id: cliente.id },
+                    livro: { id: livroId },
                 };
-                
                 await api.post('/emprestimos', novoEmprestimo);
+
                 alert('Empréstimo solicitado com sucesso!');
-                fetchDados(cliente.id_cliente);
+                fetchDados(cliente.id);
             } catch (error) {
                 alert('Falha ao solicitar o empréstimo. Tente novamente.');
                 console.error("Erro ao solicitar empréstimo:", error);
@@ -132,13 +128,13 @@ const ClienteDashboard = () => {
                                 </TableHead>
                                 <TableBody>
                                     {meusEmprestimos.map((emp) => (
-                                        <TableRow key={emp.id_emprestimo}>
+                                        <TableRow key={emp.id}>
                                             <TableCell>{emp.livro.titulo}</TableCell>
-                                            <TableCell>{emp.data_retirada}</TableCell>
-                                            <TableCell>{emp.data_retorno_previsto}</TableCell>
+                                            <TableCell>{emp.dataRetirada}</TableCell>
+                                            <TableCell>{emp.dataRetornoPrevisto}</TableCell>
                                             <TableCell align="right">
-                                                <Button size="small" variant="contained" onClick={() => handleDevolver(emp.id_emprestimo)} sx={{ mr: 1 }}>Devolver</Button>
-                                                <Button size="small" variant="outlined" onClick={() => handleRenovar(emp.id_emprestimo)}>Renovar</Button>
+                                                <Button size="small" variant="contained" onClick={() => handleDevolver(emp.id)} sx={{ mr: 1 }}>Devolver</Button>
+                                                <Button size="small" variant="outlined" onClick={() => handleRenovar(emp.id)}>Renovar</Button>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -156,33 +152,26 @@ const ClienteDashboard = () => {
                     <Grid container spacing={3}>
                         {livrosDisponiveis.length > 0 ? (
                             livrosDisponiveis.map((livro) => (
-                            <Grid item key={livro.id_livro} xs={12} sm={6} md={4}>
+                            <Grid item key={livro.id} xs={12} sm={6} md={4}>
                                 <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                                     <CardContent sx={{ flexGrow: 1 }}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                                             <AutoStoriesIcon color="primary" sx={{ mr: 1.5 }}/>
                                             <Typography variant="h6" component="div">{livro.titulo}</Typography>
                                         </Box>
-                                        <Typography sx={{ mb: 1 }} color="text.secondary">Ano: {livro.ano_publicacao}</Typography>
+                                        <Typography sx={{ mb: 1 }} color="text.secondary">Ano: {livro.anoPublicacao}</Typography>
                                         <Typography variant="body2">
-                                            <strong>{livro.qnt_disponivel}</strong> {livro.qnt_disponivel > 1 ? 'cópias disponíveis' : 'cópia disponível'}
+                                            <strong>{livro.qntDisponivel}</strong> {livro.qntDisponivel > 1 ? 'cópias disponíveis' : 'cópia disponível'}
                                         </Typography>
                                     </CardContent>
                                     <CardActions sx={{ justifyContent: 'flex-end', p:2 }}>
-                                        <Button 
-                                            size="medium" 
-                                            variant="contained" 
-                                            color="secondary"
-                                            onClick={() => handleSolicitarEmprestimo(livro.id_livro)}
-                                        >
-                                            Solicitar Empréstimo
-                                        </Button>
+                                        <Button size="medium" variant="contained" color="secondary" onClick={() => handleSolicitarEmprestimo(livro.id)}>Solicitar Empréstimo</Button>
                                     </CardActions>
                                 </Card>
                             </Grid>
                         ))) : (
                             <Grid item xs={12}>
-                            <EmptyState message="Nenhum livro disponível para empréstimo no momento." />
+                                <EmptyState message="Nenhum livro disponível para empréstimo no momento." />
                             </Grid>
                         )}
                     </Grid>

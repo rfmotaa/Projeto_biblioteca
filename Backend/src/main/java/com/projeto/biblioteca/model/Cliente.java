@@ -1,6 +1,7 @@
 package com.projeto.biblioteca.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
@@ -40,6 +41,7 @@ public class Cliente {
     private StatusCliente status;
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Emprestimo> emprestimos = new ArrayList<>();
 
     public Cliente() {}

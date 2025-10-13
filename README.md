@@ -14,22 +14,18 @@ Este é um projeto pessoal, em que o objetivo principal foi desenvolver uma apli
 ## 📖 Summary 
 
 - [Objetivo principal](#-objetivo-principal)
-- [Desenvolvimento e tecnologias utilizadas](#-desenvolvimento-e-tecnologias-utilizadas)
 - [Como rodar](#-como-rodar)
 - [Contato](#-contato)
 
 ## 🥅 Objetivo principal
 
-O principal objetivo deste projeto é demonstrar minha capacidade de construir um site com diversas funções integradas, o uso de Javascript puro foi escolhido propositalmente para aprimorar os fundamentos da linguagem, 
-sendo uma ótima prática antes de iniciar o aprendizado com bibliotecas e frameworks mais avançados de front-end.
+O principal objetivo deste projeto é demonstrar minha capacidade de construir um sistema full stack, além de construir uma base sólida de conhecimento nas ferramentas utilizadas .
 
-Sobre o site, temos em vista criar um local de reviews de jogos intuitivo que:
-- Forneça informações sobre os jogos.
-- Tenha um sistema de perfil integrado.
-- Faça com que os usuários possam criar novas reviews, ve-lás, editar e excluir (CRUD).
-- Permita ver reviews já publicadas previamente e o rating de determinado jogo.
-
-Este projeto foi desenvolvido inteiramente com FIGMA, HTML/CSS e Javascript
+Sobre o sistema, o principal objetivo foi:
+- Se mostre organizado visualmente.
+- Tenha um sistema de perfil e admin integrado.
+- Faça com que os usuários possam realizar o CRUD de suas reservas.
+- Siga as regras de negócio estabelecidas.
 
 ## 💻 Como rodar
 

@@ -1,5 +1,6 @@
 package com.projeto.biblioteca.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -20,6 +21,7 @@ public class Emprestimo {
 
     @ManyToOne
     @JoinColumn(name = "id_cliente", nullable = false)
+    @JsonBackReference
     private Cliente cliente;
 
     @ManyToOne
