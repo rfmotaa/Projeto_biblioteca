@@ -68,7 +68,7 @@ Abra um novo terminal e execute os comandos
 ```bash
 cd Frontend
 npm install
-npm run
+npm run dev
 ```
 Acesse a porta que foi dada no temrinal
 
