@@ -48,7 +48,7 @@ Abra o terminal e execute o comando abaixo para clonar o repositório:
 git clone https://github.com/rfmotaa/Projeto_biblioteca.git
 ```
 
-### 💬 2. Gerar o banco de dados na sua máquina
+### 🗄️ 2. Gerar o banco de dados na sua máquina
 
 Rode o script `ScriptSQL.sql` na sua máquina para criar o banco de dados local.
 
@@ -65,7 +65,7 @@ mvn spring-boot:run
 ### 🎨 4. Acessar o frontend
 
 Abra um novo terminal e execute os comandos
-```
+```bash
 cd Frontend
 npm install
 npm run
