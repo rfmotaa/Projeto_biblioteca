@@ -15,11 +15,8 @@ const LandingPage = () => {
             textAlign: 'center',
             }}
         >
-            <Typography component="h1" variant="h3" gutterBottom>
-            Bem-vindo ao Sistema da Biblioteca
-            </Typography>
-            <Typography component="h2" variant="h5" color="text.secondary" sx={{ mb: 6 }}>
-            Por favor, selecione o tipo de acesso:
+            <Typography component="h1" variant="h3" gutterBottom>Bem-vindo ao Sistema da Biblioteca</Typography>
+            <Typography component="h2" variant="h5" color="text.secondary" sx={{ mb: 6 }}>Por favor, selecione o tipo de acesso:
             </Typography>
             
             <Grid container spacing={4} justifyContent="center">

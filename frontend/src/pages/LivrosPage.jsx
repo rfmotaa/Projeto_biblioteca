@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import api from '../services/api.js';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Typography, Box, Container } from '@mui/material';
 
+// Falta adicionar a função de adicionarLivro() e editarLivro()
+
 const LivrosPage = () => {
     const [livros, setLivros] = useState([]);
 
@@ -41,15 +43,15 @@ const LivrosPage = () => {
             </TableHead>
             <TableBody>
                 {livros.map((livro) => (
-                <TableRow key={livro.id_livro}>
-                    <TableCell>{livro.id_livro}</TableCell>
+                <TableRow key={livro.id}>
+                    <TableCell>{livro.id}</TableCell>
                     <TableCell>{livro.titulo}</TableCell>
-                    <TableCell>{livro.ano_publicacao}</TableCell>
-                    <TableCell>{livro.qnt_total}</TableCell>
-                    <TableCell>{livro.qnt_disponivel}</TableCell>
+                    <TableCell>{livro.anoPublicacao}</TableCell>
+                    <TableCell>{livro.qntTotal}</TableCell>
+                    <TableCell>{livro.qntDisponivel}</TableCell>
                     <TableCell align="right">
                     <Button size="small" variant="outlined" sx={{ mr: 1 }}>Editar</Button>
-                    <Button size="small" variant="outlined" color="error" onClick={() => handleDeletar(livro.id_livro)}>Excluir</Button>
+                    <Button size="small" variant="outlined" color="error" onClick={() => handleDeletar(livro.id)}>Excluir</Button>
                     </TableCell>
                 </TableRow>
                 ))}

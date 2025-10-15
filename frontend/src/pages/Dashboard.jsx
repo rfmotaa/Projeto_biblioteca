@@ -17,10 +17,8 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Função para buscar todos os dados para as estatísticas
         const fetchStats = async () => {
             try {
-                // Usamos Promise.all para fazer as requisições em paralelo, é mais rápido!
                 const [livrosResponse, clientesResponse, emprestimosResponse] = await Promise.all([
                     api.get('/livros'),
                     api.get('/clientes'),
@@ -34,7 +32,6 @@ const Dashboard = () => {
                 });
             } catch (error) {
                 console.error("Erro ao buscar estatísticas:", error);
-                // Você pode adicionar um estado de erro aqui para mostrar na tela
             } finally {
                 setLoading(false);
             }
@@ -45,64 +42,40 @@ const Dashboard = () => {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            {/* --- SEÇÃO DE BOAS-VINDAS --- */}
             <Box sx={{ mb: 4 }}>
-                <Typography variant="h4" component="h1" gutterBottom>
-                    Dashboard
-                </Typography>
-                <Typography variant="h6" component="p">
-                    {/* O '?' (optional chaining) previne erros caso 'funcionario' ainda não tenha sido carregado */}
-                    Olá, {funcionario?.nome || 'Funcionário'}! Bem-vindo(a) ao sistema.
-                </Typography>
+                <Typography variant="h4" component="h1" gutterBottom> Dashboard </Typography>
+                <Typography variant="h6" component="p"> Olá, {funcionario?.nome || 'Funcionário'}! Bem-vindo(a) ao sistema. </Typography>
             </Box>
-
-            {/* --- SEÇÃO DE ESTATÍSTICAS --- */}
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                     <CircularProgress />
                 </Box>
             ) : (
                 <Grid container spacing={3}>
-                    {/* Card Total de Livros */}
                     <Grid item xs={12} md={4} lg={4}>
                         <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <MenuBookIcon color="primary" sx={{ fontSize: 40, mb: 1 }}/>
-                            <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                                Total de Livros
-                            </Typography>
-                            <Typography component="p" variant="h4">
-                                {stats.totalLivros}
-                            </Typography>
+                            <Typography component="h2" variant="h6" color="primary" gutterBottom> Total de Livros </Typography>
+                            <Typography component="p" variant="h4">{stats.totalLivros}</Typography>
                         </Paper>
                     </Grid>
-                    {/* Card Total de Clientes */}
                     <Grid item xs={12} md={4} lg={4}>
                         <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <PeopleIcon color="secondary" sx={{ fontSize: 40, mb: 1 }}/>
-                            <Typography component="h2" variant="h6" color="secondary" gutterBottom>
-                                Clientes Cadastrados
-                            </Typography>
-                            <Typography component="p" variant="h4">
-                                {stats.totalClientes}
-                            </Typography>
+                            <Typography component="h2" variant="h6" color="secondary" gutterBottom> Clientes Cadastrados</Typography>
+                            <Typography component="p" variant="h4">{stats.totalClientes}</Typography>
                         </Paper>
                     </Grid>
-                    {/* Card Total de Empréstimos */}
                     <Grid item xs={12} md={4} lg={4}>
                         <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <ReceiptLongIcon style={{ color: '#f57c00' }} sx={{ fontSize: 40, mb: 1 }}/>
-                            <Typography component="h2" variant="h6" style={{ color: '#f57c00' }} gutterBottom>
-                                Empréstimos Realizados
-                            </Typography>
-                            <Typography component="p" variant="h4">
-                                {stats.totalEmprestimos}
-                            </Typography>
+                            <Typography component="h2" variant="h6" style={{ color: '#f57c00' }} gutterBottom>Empréstimos Realizados</Typography>
+                            <Typography component="p" variant="h4">{stats.totalEmprestimos}</Typography>
                         </Paper>
                     </Grid>
                 </Grid>
             )}
 
-            {/* --- SEÇÃO DE AÇÕES RÁPIDAS --- */}
             <Box sx={{ mt: 5, borderTop: '1px solid #ddd', pt: 4 }}>
                 <Typography variant="h5" component="h2" gutterBottom>
                     Ações Rápidas

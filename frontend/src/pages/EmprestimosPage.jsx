@@ -41,13 +41,13 @@ const EmprestimosPage = () => {
                     </TableHead>
                     <TableBody>
                         {emprestimos.map((emp) => (
-                            <TableRow key={emp.id_emprestimo}>
-                                <TableCell>{emp.id_emprestimo}</TableCell>
+                            <TableRow key={emp.id}>
+                                <TableCell>{emp.id}</TableCell>
                                 <TableCell>{emp.cliente.nome}</TableCell>
                                 <TableCell>{emp.livro.titulo}</TableCell>
-                                <TableCell>{emp.data_retirada}</TableCell>
-                                <TableCell>{emp.data_retorno_previsto}</TableCell>
-                                <TableCell>{emp.data_retorno_oficial ? `Devolvido em ${emp.data_retorno_oficial}` : 'Em aberto'}</TableCell>
+                                <TableCell>{emp.dataRetirada}</TableCell>
+                                <TableCell>{emp.dataRetornoPrevisto}</TableCell>
+                                <TableCell>{emp.dataRetornoOficial ? `Devolvido em ${emp.dataRetornoOficial}` : 'Em aberto'}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

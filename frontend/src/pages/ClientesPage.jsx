@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import api from '../services/api.js';
 import { TextField, Button, Box, Typography, List, ListItem, ListItemText, Paper, Divider } from '@mui/material';
 
@@ -24,13 +24,7 @@ const ClientesPage = () => {
         <Box>
             <Typography variant="h4" gutterBottom>Busca de Clientes</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-                <TextField 
-                    label="Buscar por nome ou email" 
-                    variant="outlined" 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    sx={{ flexGrow: 1, mr: 2 }}
-                />
+                <TextField label="Buscar pelo nome" variant="outlined" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} sx={{ flexGrow: 1, mr: 2 }}/>
                 <Button variant="contained" onClick={handleSearch}>Buscar</Button>
             </Box>
 
@@ -39,12 +33,9 @@ const ClientesPage = () => {
                     <List>
                         {results.length > 0 ? (
                             results.map((cliente, index) => (
-                                <React.Fragment key={cliente.id_cliente}>
+                                <React.Fragment key={cliente.id}>
                                     <ListItem>
-                                        <ListItemText 
-                                            primary={cliente.nome}
-                                            secondary={`Email: ${cliente.email} | Status: ${cliente.status}`}
-                                        />
+                                        <ListItemText primary={cliente.nome} secondary={`Email: ${cliente.email} | Status: ${cliente.status}`}/>
                                     </ListItem>
                                     {index < results.length - 1 && <Divider />}
                                 </React.Fragment>
