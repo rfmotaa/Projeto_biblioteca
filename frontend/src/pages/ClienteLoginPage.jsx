@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, Grid } from '@mui/material';
 
 const ClienteLoginPage = () => {
     const [email, setEmail] = useState('');
@@ -43,6 +43,11 @@ const ClienteLoginPage = () => {
                 <TextField margin="normal" required fullWidth name="password" label="Senha" type="password" id="password" autoComplete="current-password" value={senha} onChange={(e) => setSenha(e.target.value)}/>
                 {error && <Typography color="error" align="center">{error}</Typography>}
                 <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}> Entrar </Button>
+                <Grid container>
+                    <Grid item>
+                        <Button component={Link} to="/cadastro/cliente" fullWidth variant="outlined" sx={{ mt: 1 }}>Não tem uma conta? Cadastre-se</Button>
+                    </Grid>
+                </Grid>
                 <Button component={Link} to="/" fullWidth variant="text" sx={{ mt: 1 }}> Voltar </Button>
             </Box>
         </Box>

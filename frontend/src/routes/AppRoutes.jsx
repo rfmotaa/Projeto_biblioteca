@@ -6,6 +6,8 @@ import MainLayout from '../components/MainLayout.jsx';
 import LandingPage from '../pages/LandingPage';
 import FuncionarioLoginPage from '../pages/FuncionarioLoginPage';
 import ClienteLoginPage from '../pages/ClienteLoginPage';
+import ClienteCadastroPage from '../pages/ClienteCadastroPage';
+import FuncionarioCadastroPage from '../pages/FuncionarioCadastroPage';
 
 // Rotas Privadas - Funcionário
 import PrivateRoute from './PrivateRoute';
@@ -22,12 +24,12 @@ import ClienteDashboard from '../pages/ClienteDashboard';
 const AppRoutes = () => {
     return (
         <Routes>
-        {/* Rotas Públicas */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login/funcionario" element={<FuncionarioLoginPage />} />
         <Route path="/login/cliente" element={<ClienteLoginPage />} />
+        <Route path="/cadastro/cliente" element={<ClienteCadastroPage />} />
+        <Route path="/cadastro/funcionario" element={<FuncionarioCadastroPage />} />
         
-        {/* Rotas Privadas do Funcionário (com layout) */}
         <Route element={<PrivateRoute />}>
             <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -37,7 +39,6 @@ const AppRoutes = () => {
             </Route>
         </Route>
 
-        {/* Rotas Privadas do Cliente */}
         <Route element={<ClientePrivateRoute />}>
             <Route path="/cliente/dashboard" element={<ClienteDashboard />} />
         </Route>

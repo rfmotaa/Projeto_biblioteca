@@ -82,37 +82,13 @@ const Dashboard = () => {
                 </Typography>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={4}>
-                        <Button 
-                            component={Link} 
-                            to="/livros" 
-                            variant="contained" 
-                            fullWidth
-                            size="large"
-                        >
-                            Gerenciar Livros
-                        </Button>
+                        <Button component={Link} to="/livros" variant="contained" fullWidth size="large">Gerenciar Livros</Button>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <Button 
-                            component={Link} 
-                            to="/clientes"
-                            variant="contained" 
-                            fullWidth
-                            size="large"
-                        >
-                            Gerenciar Clientes
-                        </Button>
+                        <Button component={Link} to="/clientes" variant="contained" fullWidth size="large">Gerenciar Clientes</Button>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <Button 
-                            component={Link} 
-                            to="/emprestimos"
-                            variant="contained" 
-                            fullWidth
-                            size="large"
-                        >
-                            Gerenciar Empréstimos
-                        </Button>
+                        <Button component={Link} to="/emprestimos" variant="contained" fullWidth size="large">Gerenciar Empréstimos</Button>
                     </Grid>
                 </Grid>
             </Box>
