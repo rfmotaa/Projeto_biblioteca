@@ -7,10 +7,6 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema Biblioteca
 -- -----------------------------------------------------
-
--- -----------------------------------------------------
--- Schema Biblioteca
--- -----------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS `Biblioteca` DEFAULT CHARACTER SET utf8 ;
 USE `Biblioteca` ;
 
@@ -85,19 +81,10 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
--- Povoamento das tabelas
--- Seleciona o banco de dados para garantir que os comandos sejam executados no lugar certo.
+-- -----------------------------------------------------
+-- Povoando o Schema Biblioteca
+-- -----------------------------------------------------
 USE `Biblioteca`;
-
--- Remove a proteção contra deleções/atualizações sem cláusula WHERE, facilitando a limpeza se necessário.
--- SET SQL_SAFE_UPDATES = 0;
-
--- Limpa as tabelas na ordem correta para evitar erros de chave estrangeira antes de inserir novos dados.
--- Descomente as linhas abaixo se quiser limpar o banco antes de popular.
--- DELETE FROM emprestimo;
--- DELETE FROM funcionario;
--- DELETE FROM cliente;
--- DELETE FROM livro;
 
 -- -----------------------------------------------------
 -- Povoando a tabela `livro`
@@ -107,37 +94,33 @@ INSERT INTO `livro` (titulo, ano_publicacao, qnt_total, qnt_disponivel) VALUES
 ('1984', 1949, 5, 5),
 ('Dom Casmurro', 1899, 4, 3),
 ('A Revolução dos Bichos', 1945, 2, 2),
-('O Guia do Mochileiro das Galáxias', 1979, 3, 3);
+('O Guia do Mochileiro das Galáxias', 1979, 3, 3),
+('Cem Anos de Solidão', 1967, 4, 1),
+('Orgulho e Preconceito', 1813, 3, 3),
+('Harry Potter e a Pedra Filosofal', 1997, 6, 4),
+('Crime e Castigo', 1866, 2, 0),
+('O Pequeno Príncipe', 1943, 5, 5);
 
 -- -----------------------------------------------------
 -- Povoando a tabela `cliente`
--- Para testar o login, use a senha correspondente (ex: 'senha123').
--- Seu backend precisa hashear a senha digitada para comparar com o hash salvo.
 -- -----------------------------------------------------
 INSERT INTO `cliente` (nome, email, status, senha_hash) VALUES
-('Ana Silva', 'ana@email.com', 'ativo', 'senha123'),
-('Bruno Costa', 'bruno@email.com', 'ativo', 'senha456'),
-('Carla Dias', 'carla@email.com', 'bloqueado', 'senha789');
+('Ana Silva', 'ana@email.com', 'ativo', 'Ana@1234!'),
+('Bruno Costa', 'bruno@email.com', 'ativo', 'BrnCst#789'),
+('Carla Dias', 'carla@email.com', 'bloqueado', 'CrlD1990*');
 
 -- -----------------------------------------------------
 -- Povoando a tabela `funcionario`
--- Para testar o login, use login 'admin' e senha 'admin123'.
 -- -----------------------------------------------------
 INSERT INTO `funcionario` (nome, login, senha_hash) VALUES
 ('Admin User', 'admin', 'admin123');
 
 -- -----------------------------------------------------
 -- Povoando a tabela `emprestimo`
--- Relaciona os clientes e livros criados acima.
 -- -----------------------------------------------------
 INSERT INTO `emprestimo` (id_cliente, id_livro, data_retirada, data_retorno_previsto, data_retorno_oficial) VALUES
--- Empréstimo ativo (Ana pegou 'O Senhor dos Anéis')
 (1, 1, '2025-10-05', '2025-10-19', NULL),
--- Empréstimo já finalizado (Bruno pegou 'Dom Casmurro')
 (2, 3, '2025-09-10', '2025-09-24', '2025-09-22'),
--- Outro empréstimo ativo (Ana pegou 'Dom Casmurro' também)
 (1, 3, '2025-10-15', '2025-10-29', NULL);
 
-
--- Confirma as transações
 COMMIT;

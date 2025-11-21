@@ -68,6 +68,18 @@ npm run dev
 ```
 Acesse a porta que foi dada no temrinal
 
+## Log-ins de teste
+
+*Funcionario*
+
+> login: admin | senha: admin123 
+
+*Cliente*
+
+>
+
+Ambos já foram criado ao rodar o `ScriptSQL.sql`.
+
 ## 📫 Contato
 
 [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/rfmotaa)
