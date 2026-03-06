@@ -37,6 +37,18 @@ public class Emprestimo {
     @Column(name = "data_retorno_oficial")
     private LocalDate dataRetornoOficial;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private StatusEmprestimo status = StatusEmprestimo.PENDENTE;
+
+    public enum StatusEmprestimo {
+        PENDENTE,
+        APROVADO,
+        REJEITADO,
+        ATIVO,
+        FINALIZADO
+    }
+
     public Emprestimo() {}
 
     public Emprestimo(Cliente cliente, Livro livro, LocalDate dataRetirada) {
@@ -65,6 +77,9 @@ public class Emprestimo {
 
     public LocalDate getDataRetornoOficial() { return dataRetornoOficial; }
     public void setDataRetornoOficial(LocalDate dataRetornoOficial) { this.dataRetornoOficial = dataRetornoOficial; }
+
+    public StatusEmprestimo getStatus() { return status; }
+    public void setStatus(StatusEmprestimo status) { this.status = status; }
 
     public void renovacao() {
         if (this.dataRetornoPrevisto != null) {

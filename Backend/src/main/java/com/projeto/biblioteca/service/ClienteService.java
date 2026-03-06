@@ -43,10 +43,19 @@ public class ClienteService {
             throw new RuntimeException("Email já está em uso.");
         }
 
-        clienteExistente.setNome(clienteAtualizado.getNome());
-        clienteExistente.setEmail(clienteAtualizado.getEmail());
-        clienteExistente.setSenhaHash(clienteAtualizado.getSenhaHash());
-        clienteExistente.setStatus(clienteAtualizado.getStatus());
+        // Only update fields that are not null (partial update support)
+        if (clienteAtualizado.getNome() != null) {
+            clienteExistente.setNome(clienteAtualizado.getNome());
+        }
+        if (clienteAtualizado.getEmail() != null) {
+            clienteExistente.setEmail(clienteAtualizado.getEmail());
+        }
+        if (clienteAtualizado.getSenhaHash() != null) {
+            clienteExistente.setSenhaHash(clienteAtualizado.getSenhaHash());
+        }
+        if (clienteAtualizado.getStatus() != null) {
+            clienteExistente.setStatus(clienteAtualizado.getStatus());
+        }
 
         return clienteRepository.save(clienteExistente);
     }

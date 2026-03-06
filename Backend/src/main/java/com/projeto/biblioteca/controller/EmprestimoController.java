@@ -62,9 +62,10 @@ public class EmprestimoController {
                     e.getDataRetornoPrevisto(),
                     e.getDataRetornoOficial(),
                     clienteDTO,
-                    livroDTO
+                    livroDTO,
+                    e.getStatus()
             );
-        }).collect(Collectors.toList()); 
+        }).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -90,5 +91,65 @@ public class EmprestimoController {
     @DeleteMapping("/{id}")
     public void deletarEmprestimo(@PathVariable Integer id) {
         emprestimoService.deletar(id);
+    }
+
+    // Loan Request/Approval System Endpoints
+
+    @PostMapping("/solicitacao")
+    public Emprestimo criarSolicitacao(@RequestBody Emprestimo emprestimo) {
+        return emprestimoService.criarSolicitacao(emprestimo);
+    }
+
+    @GetMapping("/pendentes")
+    public List<EmprestimoDTO> listarPendentes() {
+        List<Emprestimo> emprestimos = emprestimoService.listarPendentes();
+
+        return emprestimos.stream().map(e -> {
+            Cliente c = e.getCliente();
+            Livro l = e.getLivro();
+
+            ClienteDTO clienteDTO = new ClienteDTO(
+                    c.getId(),
+                    c.getNome(),
+                    c.getEmail(),
+                    c.getStatus(),
+                    c.getEmprestimos()
+                            .stream()
+                            .map(Emprestimo::getId)
+                            .collect(Collectors.toList())
+            );
+
+            LivroDTO livroDTO = new LivroDTO(
+                    l.getId(),
+                    l.getTitulo(),
+                    l.getAnoPublicacao(),
+                    l.getQntTotal(),
+                    l.getQntDisponivel(),
+                    l.getEmprestimos()
+                            .stream()
+                            .map(Emprestimo::getId)
+                            .collect(Collectors.toList())
+            );
+
+            return new EmprestimoDTO(
+                    e.getId(),
+                    e.getDataRetirada(),
+                    e.getDataRetornoPrevisto(),
+                    e.getDataRetornoOficial(),
+                    clienteDTO,
+                    livroDTO,
+                    e.getStatus()
+            );
+        }).collect(Collectors.toList());
+    }
+
+    @PatchMapping("/{id}/aprovar")
+    public Emprestimo aprovarSolicitacao(@PathVariable Integer id) {
+        return emprestimoService.aprovarSolicitacao(id);
+    }
+
+    @PatchMapping("/{id}/rejeitar")
+    public Emprestimo rejeitarSolicitacao(@PathVariable Integer id) {
+        return emprestimoService.rejeitarSolicitacao(id);
     }
 }

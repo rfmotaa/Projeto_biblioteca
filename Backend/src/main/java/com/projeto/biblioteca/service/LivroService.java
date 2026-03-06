@@ -31,16 +31,33 @@ public class LivroService {
     }
 
     public Livro salvar(Integer id, Livro livroAtualizado) {
-        if (livroAtualizado.getQntDisponivel() > livroAtualizado.getQntTotal()) {
-            throw new RuntimeException("Quantidade disponível não pode ser maior que a quantidade total.");
-        }
-
         Livro livroExistente = buscarPorId(id);
 
-        livroExistente.setTitulo(livroAtualizado.getTitulo());
-        livroExistente.setAnoPublicacao(livroAtualizado.getAnoPublicacao());
-        livroExistente.setQntTotal(livroAtualizado.getQntTotal());
-        livroExistente.setQntDisponivel(livroAtualizado.getQntDisponivel());
+        // Validate that available doesn't exceed total (if both provided)
+        if (livroAtualizado.getQntTotal() != null && livroAtualizado.getQntDisponivel() != null) {
+            if (livroAtualizado.getQntDisponivel() > livroAtualizado.getQntTotal()) {
+                throw new RuntimeException("Quantidade disponível não pode ser maior que a quantidade total.");
+            }
+        }
+
+        // Only update fields that are not null (partial update support)
+        if (livroAtualizado.getTitulo() != null) {
+            livroExistente.setTitulo(livroAtualizado.getTitulo());
+        }
+        if (livroAtualizado.getAnoPublicacao() != null) {
+            livroExistente.setAnoPublicacao(livroAtualizado.getAnoPublicacao());
+        }
+        if (livroAtualizado.getQntTotal() != null) {
+            livroExistente.setQntTotal(livroAtualizado.getQntTotal());
+        }
+        if (livroAtualizado.getQntDisponivel() != null) {
+            livroExistente.setQntDisponivel(livroAtualizado.getQntDisponivel());
+        }
+
+        // Final validation
+        if (livroExistente.getQntDisponivel() > livroExistente.getQntTotal()) {
+            throw new RuntimeException("Quantidade disponível não pode ser maior que a quantidade total.");
+        }
 
         return livroRepository.save(livroExistente);
     }

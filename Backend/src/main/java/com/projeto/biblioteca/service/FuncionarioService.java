@@ -38,9 +38,16 @@ public class FuncionarioService {
             throw new RuntimeException("Login já está em uso.");
         }
 
-        funcionarioExistente.setNome(funcionarioAtualizado.getNome());
-        funcionarioExistente.setLogin(funcionarioAtualizado.getLogin());
-        funcionarioExistente.setSenhaHash(funcionarioAtualizado.getSenhaHash());
+        // Only update fields that are not null (partial update support)
+        if (funcionarioAtualizado.getNome() != null) {
+            funcionarioExistente.setNome(funcionarioAtualizado.getNome());
+        }
+        if (funcionarioAtualizado.getLogin() != null) {
+            funcionarioExistente.setLogin(funcionarioAtualizado.getLogin());
+        }
+        if (funcionarioAtualizado.getSenhaHash() != null) {
+            funcionarioExistente.setSenhaHash(funcionarioAtualizado.getSenhaHash());
+        }
 
         return funcionarioRepository.save(funcionarioExistente);
     }

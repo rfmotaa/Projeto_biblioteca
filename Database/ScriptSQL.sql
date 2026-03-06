@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `Biblioteca`.`emprestimo` (
   `data_retirada` DATE NOT NULL,
   `data_retorno_previsto` DATE NOT NULL,
   `data_retorno_oficial` DATE NULL,
+  `status` ENUM('PENDENTE', 'APROVADO', 'REJEITADO', 'ATIVO', 'FINALIZADO') NOT NULL DEFAULT 'PENDENTE',
   PRIMARY KEY (`id_emprestimo`),
   INDEX `id_cliente_idx` (`id_cliente` ASC) VISIBLE,
   INDEX `id_livro_idx` (`id_livro` ASC) VISIBLE,
@@ -118,9 +119,9 @@ INSERT INTO `funcionario` (nome, login, senha_hash) VALUES
 -- -----------------------------------------------------
 -- Povoando a tabela `emprestimo`
 -- -----------------------------------------------------
-INSERT INTO `emprestimo` (id_cliente, id_livro, data_retirada, data_retorno_previsto, data_retorno_oficial) VALUES
-(1, 1, '2025-10-05', '2025-10-19', NULL),
-(2, 3, '2025-09-10', '2025-09-24', '2025-09-22'),
-(1, 3, '2025-10-15', '2025-10-29', NULL);
+INSERT INTO `emprestimo` (id_cliente, id_livro, data_retirada, data_retorno_previsto, data_retorno_oficial, status) VALUES
+(1, 1, '2025-10-05', '2025-10-19', NULL, 'ATIVO'),
+(2, 3, '2025-09-10', '2025-09-24', '2025-09-22', 'FINALIZADO'),
+(1, 3, '2025-10-15', '2025-10-29', NULL, 'ATIVO');
 
 COMMIT;
