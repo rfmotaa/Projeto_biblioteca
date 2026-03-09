@@ -61,7 +61,12 @@ public class SistemaLoginService {
         Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
 
         if (clienteOpt.isPresent() && clienteOpt.get().verificarSenha(senha)) {
-            clienteAutenticado = clienteOpt.get();
+            Cliente cliente = clienteOpt.get();
+            // Check if client is blocked
+            if (cliente.getStatus() == Cliente.StatusCliente.bloqueado) {
+                throw new RuntimeException("Cliente está bloqueado. Entre em contato com a administração.");
+            }
+            clienteAutenticado = cliente;
             expiracaoLoginCliente = System.currentTimeMillis() + TEMPO_LOGIN_VALIDO;
             return true;
         }

@@ -43,7 +43,6 @@ public class ClienteService {
             throw new RuntimeException("Email já está em uso.");
         }
 
-        // Only update fields that are not null (partial update support)
         if (clienteAtualizado.getNome() != null) {
             clienteExistente.setNome(clienteAtualizado.getNome());
         }

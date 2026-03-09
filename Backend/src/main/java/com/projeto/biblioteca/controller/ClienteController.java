@@ -27,12 +27,17 @@ public class ClienteController {
         String senha = credenciais.get("senha");
 
         Map<String, String> resp = new HashMap<>();
-        if (sistemaLoginService.autenticarCliente(email, senha)) {
-            resp.put("status", "sucesso");
-            resp.put("mensagem", "Login realizado com sucesso");
-        } else {
+        try {
+            if (sistemaLoginService.autenticarCliente(email, senha)) {
+                resp.put("status", "sucesso");
+                resp.put("mensagem", "Login realizado com sucesso");
+            } else {
+                resp.put("status", "erro");
+                resp.put("mensagem", "Login ou senha incorretos");
+            }
+        } catch (RuntimeException e) {
             resp.put("status", "erro");
-            resp.put("mensagem", "Login ou senha incorretos");
+            resp.put("mensagem", e.getMessage());
         }
         return resp;
     }

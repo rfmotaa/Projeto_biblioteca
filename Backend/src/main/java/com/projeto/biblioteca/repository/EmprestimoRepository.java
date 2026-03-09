@@ -10,8 +10,8 @@ import java.util.List;
 
 @Repository
 public interface EmprestimoRepository extends JpaRepository<Emprestimo, Integer> {
-    List<Emprestimo> findByClienteId(Long clienteId);
-    List<Emprestimo> findByLivroId(Long livroId);
+    List<Emprestimo> findByClienteId(Integer clienteId);
+    List<Emprestimo> findByLivroId(Integer livroId);
     List<Emprestimo> findByDataRetiradaBetween(LocalDate inicio, LocalDate fim);
     List<Emprestimo> findByDataRetornoPrevistoBefore(LocalDate data);
     List<Emprestimo> findByDataRetornoOficialIsNull();

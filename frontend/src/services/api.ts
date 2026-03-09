@@ -237,57 +237,8 @@ export const emprestimosApi = {
     return response.data;
   },
 
-  create: async (data: EmprestimoForm): Promise<Emprestimo> => {
-    // Backend expects full Cliente and Livro objects, not just IDs
-    // We need to fetch the full objects first
-    const [clienteResponse, livroResponse] = await Promise.all([
-      api.get<Cliente>(`/clientes/${data.clienteId}`),
-      api.get<Livro>(`/livros/${data.livroId}`),
-    ]);
-
-    const cliente = clienteResponse.data;
-    const livro = livroResponse.data;
-
-    const response = await api.post<Emprestimo>('/emprestimos', {
-      cliente: cliente, // Full Cliente object
-      livro: livro, // Full Livro object
-      dataRetirada: data.dataRetirada,
-      dataRetornoPrevisto: data.dataRetornoPrevisto,
-    });
-    return response.data;
-  },
-
-  update: async (id: number, data: Partial<EmprestimoForm>): Promise<Emprestimo> => {
-    const response = await api.put<Emprestimo>(`/emprestimos/${id}`, data);
-    return response.data;
-  },
-
-  delete: async (id: number): Promise<void> => {
-    await api.delete(`/emprestimos/${id}`);
-  },
-
-  devolucao: async (id: number): Promise<Emprestimo> => {
-    const response = await api.patch<Emprestimo>(`/emprestimos/${id}/devolucao`);
-    return response.data;
-  },
-
-  renovacao: async (id: number): Promise<Emprestimo> => {
-    const response = await api.patch<Emprestimo>(`/emprestimos/${id}/renovacao`);
-    return response.data;
-  },
-
-  // Loan Request System
-  criarSolicitacao: async (clienteId: number, livroId: number): Promise<Emprestimo> => {
-    // Backend expects full Cliente and Livro objects
-    const [clienteResponse, livroResponse] = await Promise.all([
-      api.get<Cliente>(`/clientes/${clienteId}`),
-      api.get<Livro>(`/livros/${livroId}`),
-    ]);
-
-    const response = await api.post<Emprestimo>('/emprestimos/solicitacao', {
-      cliente: clienteResponse.data,
-      livro: livroResponse.data,
-    });
+  getAtivos: async (): Promise<Emprestimo[]> => {
+    const response = await api.get<Emprestimo[]>('/emprestimos/ativos');
     return response.data;
   },
 
@@ -295,6 +246,22 @@ export const emprestimosApi = {
     const response = await api.get<Emprestimo[]>('/emprestimos/pendentes');
     return response.data;
   },
+
+  // ============================================================
+  // CLIENTE - Solicitar Empréstimo
+  // ============================================================
+
+  criarSolicitacao: async (clienteId: number, livroId: number): Promise<Emprestimo> => {
+    const response = await api.post<Emprestimo>('/emprestimos/solicitacao', {
+      clienteId,
+      livroId,
+    });
+    return response.data;
+  },
+
+  // ============================================================
+  // ADMIN - Gerenciar Solicitações
+  // ============================================================
 
   aprovarSolicitacao: async (id: number): Promise<Emprestimo> => {
     const response = await api.patch<Emprestimo>(`/emprestimos/${id}/aprovar`);
@@ -304,6 +271,51 @@ export const emprestimosApi = {
   rejeitarSolicitacao: async (id: number): Promise<Emprestimo> => {
     const response = await api.patch<Emprestimo>(`/emprestimos/${id}/rejeitar`);
     return response.data;
+  },
+
+  // ============================================================
+  // ADMIN - Criar Empréstimo Diretamente
+  // ============================================================
+
+  criarDireto: async (data: EmprestimoForm): Promise<Emprestimo> => {
+    const response = await api.post<Emprestimo>('/emprestimos', {
+      clienteId: data.clienteId,
+      livroId: data.livroId,
+    });
+    return response.data;
+  },
+
+  // Legacy method name (uses same endpoint)
+  create: async (data: EmprestimoForm): Promise<Emprestimo> => {
+    return emprestimosApi.criarDireto(data);
+  },
+
+  // ============================================================
+  // ADMIN - Renovar Empréstimo
+  // ============================================================
+
+  renovar: async (id: number): Promise<Emprestimo> => {
+    const response = await api.patch<Emprestimo>(`/emprestimos/${id}/renovar`);
+    return response.data;
+  },
+
+  // Legacy method name (uses same endpoint)
+  renovacao: async (id: number): Promise<Emprestimo> => {
+    return emprestimosApi.renovar(id);
+  },
+
+  // ============================================================
+  // ADMIN - Encerrar/Finalizar Empréstimo
+  // ============================================================
+
+  finalizar: async (id: number): Promise<Emprestimo> => {
+    const response = await api.patch<Emprestimo>(`/emprestimos/${id}/finalizar`);
+    return response.data;
+  },
+
+  // Legacy method name (uses same endpoint)
+  devolucao: async (id: number): Promise<Emprestimo> => {
+    return emprestimosApi.finalizar(id);
   },
 };
 

@@ -8,6 +8,7 @@ interface User {
   email?: string;
   login?: string;
   tipo: 'funcionario' | 'cliente';
+  status?: 'ativo' | 'bloqueado';
 }
 
 interface AuthContextType {
@@ -79,6 +80,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           nome: clienteData.nome,
           email: clienteData.email,
           tipo: 'cliente',
+          status: clienteData.status,
         };
         setUser(userData);
         sessionStorage.setItem('user', JSON.stringify(userData));

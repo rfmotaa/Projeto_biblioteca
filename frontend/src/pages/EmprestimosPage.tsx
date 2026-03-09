@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Search, CheckCircle, RotateCcw } from 'lucide-react';
+import { Plus, Search, CheckCircle, RotateCcw, XCircle, Clock } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import {
@@ -18,14 +18,9 @@ import {
   DialogTrigger,
 } from '../components/ui/dialog';
 import { Label } from '../components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
+import { SearchableSelect } from '../components/SearchableSelect';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { emprestimosApi, livrosApi, clientesApi } from '../services/api';
 import type { Emprestimo, Livro, Cliente } from '../services/types';
 import { toast } from 'sonner';
@@ -33,18 +28,21 @@ import { format } from 'date-fns';
 
 export default function EmprestimosPage() {
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
+  const [pendentes, setPendentes] = useState<Emprestimo[]>([]);
   const [livros, setLivros] = useState<Livro[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [allLivros, setAllLivros] = useState<Livro[]>([]);
+  const [allClientes, setAllClientes] = useState<Cliente[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
-    clienteId: 0,
-    livroId: 0,
+    clienteId: '',
+    livroId: '',
   });
 
   useEffect(() => {
-    Promise.all([fetchEmprestimos(), fetchLivros(), fetchClientes()]);
+    Promise.all([fetchEmprestimos(), fetchPendentes(), fetchLivros(), fetchClientes()]);
   }, []);
 
   const fetchEmprestimos = async () => {
@@ -59,10 +57,20 @@ export default function EmprestimosPage() {
     }
   };
 
+  const fetchPendentes = async () => {
+    try {
+      const data = await emprestimosApi.getPendentes();
+      setPendentes(data);
+    } catch (error) {
+      console.error('Erro ao carregar pendentes:', error);
+    }
+  };
+
   const fetchLivros = async () => {
     try {
-      const data = await livrosApi.getDisponiveis();
-      setLivros(data);
+      const data = await livrosApi.getAll();
+      setAllLivros(data);
+      setLivros(data.filter(l => l.qntDisponivel > 0));
     } catch (error) {
       console.error('Erro ao carregar livros:', error);
     }
@@ -70,11 +78,16 @@ export default function EmprestimosPage() {
 
   const fetchClientes = async () => {
     try {
-      const data = await clientesApi.getByStatus('ativo');
-      setClientes(data);
+      const data = await clientesApi.getAll();
+      setAllClientes(data);
+      setClientes(data.filter(c => c.status === 'ativo'));
     } catch (error) {
       console.error('Erro ao carregar clientes:', error);
     }
+  };
+
+  const refreshAll = () => {
+    Promise.all([fetchEmprestimos(), fetchPendentes(), fetchLivros()]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,69 +99,107 @@ export default function EmprestimosPage() {
     }
 
     try {
-      const dataRetirada = new Date().toISOString().split('T')[0];
-      const dataRetornoPrevista = new Date();
-      dataRetornoPrevista.setDate(dataRetornoPrevista.getDate() + 14);
-
-      await emprestimosApi.create({
-        clienteId: formData.clienteId,
-        livroId: formData.livroId,
-        dataRetirada: dataRetirada,
-        dataRetornoPrevisto: dataRetornoPrevista.toISOString().split('T')[0],
+      await emprestimosApi.criarDireto({
+        clienteId: parseInt(formData.clienteId),
+        livroId: parseInt(formData.livroId),
+        dataRetirada: new Date().toISOString().split('T')[0],
+        dataRetornoPrevisto: new Date().toISOString().split('T')[0],
       });
 
-      toast.success('Empréstimo registrado com sucesso!');
+      toast.success('Empréstimo criado com sucesso!');
       setDialogOpen(false);
-      setFormData({ clienteId: 0, livroId: 0 });
-      Promise.all([fetchEmprestimos(), fetchLivros()]);
-    } catch (error) {
-      console.error('Erro ao registrar empréstimo:', error);
-      toast.error('Erro ao registrar empréstimo');
+      setFormData({ clienteId: '', livroId: '' });
+      refreshAll();
+    } catch (error: any) {
+      console.error('Erro ao criar empréstimo:', error);
+      const errorMessage = error?.response?.data || 'Erro ao criar empréstimo';
+      toast.error(typeof errorMessage === 'string' ? errorMessage : 'Erro ao criar empréstimo');
     }
   };
 
-  const handleDevolucao = async (id: number) => {
+  const handleAprovar = async (id: number) => {
+    try {
+      await emprestimosApi.aprovarSolicitacao(id);
+      toast.success('Solicitação aprovada com sucesso!');
+      refreshAll();
+    } catch (error: any) {
+      console.error('Erro ao aprovar:', error);
+      const errorMessage = error?.response?.data || 'Erro ao aprovar solicitação';
+      toast.error(typeof errorMessage === 'string' ? errorMessage : 'Erro ao aprovar solicitação');
+    }
+  };
+
+  const handleRejeitar = async (id: number) => {
+    if (!confirm('Tem certeza que deseja rejeitar esta solicitação?')) return;
+
+    try {
+      await emprestimosApi.rejeitarSolicitacao(id);
+      toast.success('Solicitação rejeitada com sucesso!');
+      refreshAll();
+    } catch (error: any) {
+      console.error('Erro ao rejeitar:', error);
+      const errorMessage = error?.response?.data || 'Erro ao rejeitar solicitação';
+      toast.error(typeof errorMessage === 'string' ? errorMessage : 'Erro ao rejeitar solicitação');
+    }
+  };
+
+  const handleRenovar = async (id: number) => {
+    if (!confirm('Deseja renovar este empréstimo por 7 dias?')) return;
+
+    try {
+      await emprestimosApi.renovar(id);
+      toast.success('Empréstimo renovado com sucesso!');
+      refreshAll();
+    } catch (error: any) {
+      console.error('Erro ao renovar:', error);
+      const errorMessage = error?.response?.data || 'Erro ao renovar empréstimo';
+      toast.error(typeof errorMessage === 'string' ? errorMessage : 'Erro ao renovar empréstimo');
+    }
+  };
+
+  const handleFinalizar = async (id: number) => {
     if (!confirm('Confirmar devolução deste livro?')) return;
 
     try {
-      await emprestimosApi.devolucao(id);
-      toast.success('Devolução registrada com sucesso!');
-      Promise.all([fetchEmprestimos(), fetchLivros()]);
-    } catch (error) {
-      console.error('Erro ao registrar devolução:', error);
-      toast.error('Erro ao registrar devolução');
-    }
-  };
-
-  const handleRenovacao = async (id: number) => {
-    if (!confirm('Confirmar renovação deste empréstimo?')) return;
-
-    try {
-      await emprestimosApi.renovacao(id);
-      toast.success('Empréstimo renovado com sucesso!');
-      fetchEmprestimos();
-    } catch (error) {
-      console.error('Erro ao renovar empréstimo:', error);
-      toast.error('Erro ao renovar empréstimo');
+      await emprestimosApi.finalizar(id);
+      toast.success('Empréstimo finalizado com sucesso!');
+      refreshAll();
+    } catch (error: any) {
+      console.error('Erro ao finalizar:', error);
+      const errorMessage = error?.response?.data || 'Erro ao finalizar empréstimo';
+      toast.error(typeof errorMessage === 'string' ? errorMessage : 'Erro ao finalizar empréstimo');
     }
   };
 
   const getStatusBadge = (emprestimo: Emprestimo) => {
-    if (emprestimo.dataRetornoOficial) {
-      return <Badge variant="secondary">Devolvido</Badge>;
+    switch (emprestimo.status) {
+      case 'PENDENTE':
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pendente</Badge>;
+      case 'APROVADO':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Aprovado</Badge>;
+      case 'REJEITADO':
+        return <Badge variant="destructive">Rejeitado</Badge>;
+      case 'ATIVO':
+        const dataPrevista = new Date(emprestimo.dataRetornoPrevisto);
+        const hoje = new Date();
+        if (hoje > dataPrevista) {
+          return <Badge variant="destructive">Atrasado</Badge>;
+        }
+        return <Badge variant="default" className="bg-green-600">Ativo</Badge>;
+      case 'FINALIZADO':
+        return <Badge variant="secondary" className="bg-gray-100 text-gray-700">Finalizado</Badge>;
+      default:
+        return <Badge variant="default">Ativo</Badge>;
     }
-    const dataPrevista = new Date(emprestimo.dataRetornoPrevisto);
-    const hoje = new Date();
-    if (hoje > dataPrevista) {
-      return <Badge variant="destructive">Atrasado</Badge>;
-    }
-    return <Badge variant="default">Ativo</Badge>;
   };
 
   const filteredEmprestimos = emprestimos.filter((emp) =>
     emp.livro.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.cliente.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const emprestimosAtivos = emprestimos.filter((e) => e.status === 'ATIVO');
+  const emprestimosAtrasados = emprestimosAtivos.filter((e) => new Date(e.dataRetornoPrevisto) < new Date());
 
   if (isLoading) {
     return (
@@ -158,15 +209,12 @@ export default function EmprestimosPage() {
     );
   }
 
-  const emprestimosAtivos = emprestimos.filter((e) => !e.dataRetornoOficial);
-  const emprestimosAtrasados = emprestimosAtivos.filter((e) => new Date(e.dataRetornoPrevisto) < new Date());
-
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Empréstimos</h1>
-          <p className="text-gray-600 mt-1">Gerencie os empréstimos de livros</p>
+          <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Empréstimos</h1>
+          <p className="text-gray-600 mt-1">Solicitações pendentes e empréstimos ativos</p>
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -178,131 +226,53 @@ export default function EmprestimosPage() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Registrar Novo Empréstimo</DialogTitle>
+              <DialogTitle>Criar Novo Empréstimo</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="livroId">Livro</Label>
-                <Select
-                  value={formData.livroId.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, livroId: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um livro" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {livros.map((livro) => (
-                      <SelectItem key={livro.id} value={livro.id.toString()}>
-                        {livro.titulo} ({livro.qntDisponivel} disponível)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  items={allLivros}
+                  value={formData.livroId}
+                  onChange={(value) => setFormData({ ...formData, livroId: value })}
+                  getLabel={(livro) => livro.titulo}
+                  getValue={(livro) => livro.id.toString()}
+                  getSubtitle={(livro) =>
+                    `${livro.qntDisponivel > 0 ? `${livro.qntDisponivel} disponível` : 'Indisponível'} - Ano: ${livro.anoPublicacao}`
+                  }
+                  placeholder="Selecione um livro"
+                  searchPlaceholder="Buscar livro por título..."
+                  emptyMessage="Nenhum livro encontrado."
+                />
               </div>
 
               <div>
                 <Label htmlFor="clienteId">Cliente</Label>
-                <Select
-                  value={formData.clienteId.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, clienteId: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clientes.map((cliente) => (
-                      <SelectItem key={cliente.id} value={cliente.id.toString()}>
-                        {cliente.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  items={allClientes}
+                  value={formData.clienteId}
+                  onChange={(value) => setFormData({ ...formData, clienteId: value })}
+                  getLabel={(cliente) => cliente.nome}
+                  getValue={(cliente) => cliente.id.toString()}
+                  getSubtitle={(cliente) => `${cliente.email} - ${cliente.status === 'ativo' ? 'Ativo' : 'Bloqueado'}`}
+                  placeholder="Selecione um cliente"
+                  searchPlaceholder="Buscar cliente por nome ou email..."
+                  emptyMessage="Nenhum cliente encontrado."
+                />
               </div>
 
-              <Button type="submit" className="w-full">Registrar Empréstimo</Button>
+              <Button type="submit" className="w-full">Criar Empréstimo</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Buscar por livro ou cliente..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+      {/* Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg shadow">
+          <p className="text-sm text-gray-600">Solicitações Pendentes</p>
+          <p className="text-2xl font-bold text-yellow-600">{pendentes.length}</p>
         </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Livro</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Data Retirada</TableHead>
-              <TableHead>Devolução Prevista</TableHead>
-              <TableHead>Data Devolução</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredEmprestimos.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center text-gray-500">
-                  Nenhum empréstimo encontrado
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredEmprestimos.map((emprestimo) => (
-                <TableRow key={emprestimo.id}>
-                  <TableCell>
-                    <p className="font-medium">{emprestimo.livro.titulo}</p>
-                  </TableCell>
-                  <TableCell>{emprestimo.cliente.nome}</TableCell>
-                  <TableCell>{format(new Date(emprestimo.dataRetirada), 'dd/MM/yyyy')}</TableCell>
-                  <TableCell>{format(new Date(emprestimo.dataRetornoPrevisto), 'dd/MM/yyyy')}</TableCell>
-                  <TableCell>
-                    {emprestimo.dataRetornoOficial
-                      ? format(new Date(emprestimo.dataRetornoOficial), 'dd/MM/yyyy')
-                      : '-'}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(emprestimo)}</TableCell>
-                  <TableCell className="text-right">
-                    {!emprestimo.dataRetornoOficial && (
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRenovacao(emprestimo.id)}
-                          title="Renovar empréstimo"
-                        >
-                          <RotateCcw className="h-4 w-4 text-blue-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDevolucao(emprestimo.id)}
-                          title="Registrar devolução"
-                        >
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        </Button>
-                      </div>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-lg shadow">
           <p className="text-sm text-gray-600">Empréstimos Ativos</p>
           <p className="text-2xl font-bold text-blue-600">{emprestimosAtivos.length}</p>
@@ -316,6 +286,190 @@ export default function EmprestimosPage() {
           <p className="text-2xl font-bold text-gray-900">{emprestimos.length}</p>
         </div>
       </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="pendentes" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="pendentes">
+            <Clock className="h-4 w-4 mr-2" />
+            Solicitações Pendentes ({pendentes.length})
+          </TabsTrigger>
+          <TabsTrigger value="ativos">
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Empréstimos Ativos ({emprestimosAtivos.length})
+          </TabsTrigger>
+          <TabsTrigger value="todos">
+            Todos ({emprestimos.length})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Solicitações Pendentes */}
+        <TabsContent value="pendentes">
+          {pendentes.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg">
+              <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <p className="text-gray-500">Nenhuma solicitação pendente</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Livro</TableHead>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Data Solicitação</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pendentes.map((emprestimo) => (
+                    <TableRow key={emprestimo.id}>
+                      <TableCell className="font-medium">{emprestimo.livro.titulo}</TableCell>
+                      <TableCell>{emprestimo.cliente.nome}</TableCell>
+                      <TableCell>{format(new Date(emprestimo.dataRetirada), 'dd/MM/yyyy')}</TableCell>
+                      <TableCell>{getStatusBadge(emprestimo)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleAprovar(emprestimo.id)}
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                            title="Aprovar"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRejeitar(emprestimo.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            title="Rejeitar"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Empréstimos Ativos */}
+        <TabsContent value="ativos">
+          {emprestimosAtivos.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg">
+              <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <p className="text-gray-500">Nenhum empréstimo ativo</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Livro</TableHead>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Retirada</TableHead>
+                    <TableHead>Devolução Prevista</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {emprestimosAtivos.map((emprestimo) => (
+                    <TableRow key={emprestimo.id}>
+                      <TableCell className="font-medium">{emprestimo.livro.titulo}</TableCell>
+                      <TableCell>{emprestimo.cliente.nome}</TableCell>
+                      <TableCell>{format(new Date(emprestimo.dataRetirada), 'dd/MM/yyyy')}</TableCell>
+                      <TableCell>{format(new Date(emprestimo.dataRetornoPrevisto), 'dd/MM/yyyy')}</TableCell>
+                      <TableCell>{getStatusBadge(emprestimo)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRenovar(emprestimo.id)}
+                            title="Renovar (+7 dias)"
+                          >
+                            <RotateCcw className="h-4 w-4 text-blue-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleFinalizar(emprestimo.id)}
+                            title="Finalizar empréstimo"
+                          >
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Todos */}
+        <TabsContent value="todos">
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Buscar por livro ou cliente..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Livro</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Retirada</TableHead>
+                  <TableHead>Devolução Prevista</TableHead>
+                  <TableHead>Devolução</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredEmprestimos.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-gray-500">
+                      Nenhum empréstimo encontrado
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredEmprestimos.map((emprestimo) => (
+                    <TableRow key={emprestimo.id}>
+                      <TableCell className="font-medium">{emprestimo.livro.titulo}</TableCell>
+                      <TableCell>{emprestimo.cliente.nome}</TableCell>
+                      <TableCell>{format(new Date(emprestimo.dataRetirada), 'dd/MM/yyyy')}</TableCell>
+                      <TableCell>{format(new Date(emprestimo.dataRetornoPrevisto), 'dd/MM/yyyy')}</TableCell>
+                      <TableCell>
+                        {emprestimo.dataRetornoOficial
+                          ? format(new Date(emprestimo.dataRetornoOficial), 'dd/MM/yyyy')
+                          : '-'}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(emprestimo)}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

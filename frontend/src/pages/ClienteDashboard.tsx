@@ -52,6 +52,11 @@ export default function ClienteDashboard() {
 
   useEffect(() => {
     if (user) {
+      // Check if user is blocked
+      if (user.status === 'bloqueado') {
+        toast.error('Sua conta está bloqueada. Entre em contato com a administração.');
+        return;
+      }
       fetchData();
     }
   }, [user]);
@@ -94,7 +99,7 @@ export default function ClienteDashboard() {
   };
 
   const emprestimosAtivos = meusEmprestimos.filter(
-    (e) => e.status === 'ATIVO' || (!e.status && !e.dataRetornoOficial)
+    (e) => e.status === 'ATIVO'
   ).length;
 
   if (isLoading) {
@@ -178,8 +183,12 @@ export default function ClienteDashboard() {
               <CheckCircle className="h-5 w-5 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">Ativo</div>
-              <p className="text-xs text-gray-500 mt-1">Sua conta está ativa</p>
+              <div className={`text-3xl font-bold ${user?.status === 'bloqueado' ? 'text-red-600' : 'text-green-600'}`}>
+                {user?.status === 'bloqueado' ? 'Bloqueado' : 'Ativo'}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {user?.status === 'bloqueado' ? 'Sua conta está bloqueada' : 'Sua conta está ativa'}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -245,7 +254,7 @@ export default function ClienteDashboard() {
                         {meusEmprestimos.some(
                           (e) =>
                             e.livro.id === livro.id &&
-                            (e.status === 'PENDENTE' || e.status === 'ATIVO' || (!e.status && !e.dataRetornoOficial))
+                            (e.status === 'PENDENTE' || e.status === 'ATIVO' || e.status === 'APROVADO')
                         ) ? (
                           <Button
                             variant="outline"
@@ -281,20 +290,22 @@ export default function ClienteDashboard() {
           </CardContent>
         </Card>
 
-        {/* Meus Empréstimos */}
+        {/* Meus Empréstimos Ativos */}
         <Card>
           <CardHeader>
-            <CardTitle>Meus Empréstimos</CardTitle>
+            <CardTitle>Meus Empréstimos Ativos</CardTitle>
           </CardHeader>
           <CardContent>
-            {meusEmprestimos.length === 0 ? (
+            {meusEmprestimos.filter(e => e.status === 'ATIVO').length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                <p>Você ainda não possui empréstimos</p>
+                <p>Você não possui empréstimos ativos</p>
                 <p className="text-sm mt-2">Solicite um livro acima para começar!</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {meusEmprestimos.map((emprestimo) => (
+                {meusEmprestimos
+                  .filter(e => e.status === 'ATIVO')
+                  .map((emprestimo) => (
                   <div
                     key={emprestimo.id}
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border"
@@ -306,6 +317,47 @@ export default function ClienteDashboard() {
                       </p>
                       <p className="text-sm text-gray-500">
                         Devolução prevista: {new Date(emprestimo.dataRetornoPrevisto).toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+                    <div className="ml-4">
+                      {getStatusBadge(emprestimo)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Histórico de Empréstimos */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Histórico de Empréstimos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {meusEmprestimos.filter(e => e.status === 'FINALIZADO' || e.status === 'REJEITADO').length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <p>Você ainda não possui empréstimos finalizados</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {meusEmprestimos
+                  .filter(e => e.status === 'FINALIZADO' || e.status === 'REJEITADO')
+                  .map((emprestimo) => (
+                  <div
+                    key={emprestimo.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border opacity-75"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-700">{emprestimo.livro.titulo}</p>
+                      <p className="text-sm text-gray-500">
+                        Retirada: {new Date(emprestimo.dataRetirada).toLocaleDateString('pt-BR')}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Devolvido em: {emprestimo.dataRetornoOficial
+                          ? new Date(emprestimo.dataRetornoOficial).toLocaleDateString('pt-BR')
+                          : new Date(emprestimo.dataRetornoPrevisto).toLocaleDateString('pt-BR')
+                        }
                       </p>
                     </div>
                     <div className="ml-4">

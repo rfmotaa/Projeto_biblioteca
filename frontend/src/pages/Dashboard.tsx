@@ -37,9 +37,7 @@ export default function Dashboard() {
         ]);
 
         const livrosDisponiveis = livros.filter((l) => l.qntDisponivel > 0).length;
-        const emprestimosAtivos = emprestimos.filter((e) =>
-          e.status === 'ATIVO' || (!e.status && !e.dataRetornoOficial)
-        ).length;
+        const emprestimosAtivos = emprestimos.filter((e) => e.status === 'ATIVO').length;
 
         setStats({
           totalLivros: livros.length,
@@ -71,9 +69,7 @@ export default function Dashboard() {
         emprestimosApi.getPendentes(),
       ]);
 
-      const emprestimosAtivos = emprestimos.filter((e) =>
-        e.status === 'ATIVO' || (!e.status && !e.dataRetornoOficial)
-      ).length;
+      const emprestimosAtivos = emprestimos.filter((e) => e.status === 'ATIVO').length;
 
       setStats((prev) => ({
         ...prev,
