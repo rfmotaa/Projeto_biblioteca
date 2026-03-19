@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router';
-import { Book, Clock, LogOut, CheckCircle, Library } from 'lucide-react';
+import { Book, Clock, LogOut, CheckCircle, Library, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import { Input } from '../components/ui/input';
 import { livrosApi, emprestimosApi } from '../services/api';
 import type { Livro, Emprestimo } from '../services/types';
 import { toast } from 'sonner';
@@ -16,6 +17,11 @@ export default function ClienteDashboard() {
   const [livrosDisponiveis, setLivrosDisponiveis] = useState<Livro[]>([]);
   const [meusEmprestimos, setMeusEmprestimos] = useState<Emprestimo[]>([]);
   const [solicitacoesPendentes, setSolicitacoesPendentes] = useState<Emprestimo[]>([]);
+  const [historicoPage, setHistoricoPage] = useState(1);
+  const historicoPageSize = 10;
+  const [livrosPage, setLivrosPage] = useState(1);
+  const livrosPageSize = 6;
+  const [livroSearch, setLivroSearch] = useState('');
 
   const handleLogout = async () => {
     await logout();
@@ -101,6 +107,29 @@ export default function ClienteDashboard() {
   const emprestimosAtivos = meusEmprestimos.filter(
     (e) => e.status === 'ATIVO'
   ).length;
+
+  const emprestimosHistorico = meusEmprestimos.filter(
+    (e) => e.status === 'FINALIZADO' || e.status === 'REJEITADO'
+  );
+  const totalHistoricoPages = Math.ceil(emprestimosHistorico.length / historicoPageSize);
+  const startIndex = (historicoPage - 1) * historicoPageSize;
+  const endIndex = startIndex + historicoPageSize;
+  const paginatedHistorico = emprestimosHistorico.slice(startIndex, endIndex);
+
+  // Filtrar e paginar livros disponíveis
+  const filteredLivros = livrosDisponiveis.filter((livro) =>
+    livro.titulo.toLowerCase().includes(livroSearch.toLowerCase()) ||
+    livro.anoPublicacao.toString().includes(livroSearch)
+  );
+  const totalLivrosPages = Math.ceil(filteredLivros.length / livrosPageSize);
+  const livrosStartIndex = (livrosPage - 1) * livrosPageSize;
+  const livrosEndIndex = livrosStartIndex + livrosPageSize;
+  const paginatedLivros = filteredLivros.slice(livrosStartIndex, livrosEndIndex);
+
+  // Resetar página da busca quando mudar o termo de busca
+  useEffect(() => {
+    setLivrosPage(1);
+  }, [livroSearch]);
 
   if (isLoading) {
     return (
@@ -234,8 +263,27 @@ export default function ClienteDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Campo de busca */}
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Buscar por título ou ano..."
+                  value={livroSearch}
+                  onChange={(e) => setLivroSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              {livroSearch && (
+                <p className="text-sm text-gray-500 mt-2">
+                  {filteredLivros.length} {filteredLivros.length === 1 ? 'livro encontrado' : 'livros encontrados'}
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {livrosDisponiveis.map((livro) => (
+              {paginatedLivros.map((livro) => (
                 <Card key={livro.id} className="border-2 hover:border-green-300 transition-colors">
                   <CardContent className="p-4">
                     <div className="flex flex-col h-full">
@@ -281,10 +329,40 @@ export default function ClienteDashboard() {
               ))}
             </div>
 
-            {livrosDisponiveis.length === 0 && (
+            {/* Estado vazio */}
+            {filteredLivros.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <Library className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p>Nenhum livro disponível no momento</p>
+                <p>{livroSearch ? 'Nenhum livro encontrado com este termo' : 'Nenhum livro disponível no momento'}</p>
+              </div>
+            )}
+
+            {/* Paginação */}
+            {totalLivrosPages > 1 && (
+              <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                <span className="text-sm text-gray-600">
+                  Página {livrosPage} de {totalLivrosPages} {livroSearch && `(${filteredLivros.length} encontrados, ${livrosDisponiveis.length} total)`}
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setLivrosPage(livrosPage - 1)}
+                    disabled={livrosPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Anterior
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setLivrosPage(livrosPage + 1)}
+                    disabled={livrosPage === totalLivrosPages}
+                  >
+                    Próxima
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
@@ -335,37 +413,66 @@ export default function ClienteDashboard() {
             <CardTitle>Histórico de Empréstimos</CardTitle>
           </CardHeader>
           <CardContent>
-            {meusEmprestimos.filter(e => e.status === 'FINALIZADO' || e.status === 'REJEITADO').length === 0 ? (
+            {emprestimosHistorico.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <p>Você ainda não possui empréstimos finalizados</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {meusEmprestimos
-                  .filter(e => e.status === 'FINALIZADO' || e.status === 'REJEITADO')
-                  .map((emprestimo) => (
-                  <div
-                    key={emprestimo.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border opacity-75"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-700">{emprestimo.livro.titulo}</p>
-                      <p className="text-sm text-gray-500">
-                        Retirada: {new Date(emprestimo.dataRetirada).toLocaleDateString('pt-BR')}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Devolvido em: {emprestimo.dataRetornoOficial
-                          ? new Date(emprestimo.dataRetornoOficial).toLocaleDateString('pt-BR')
-                          : new Date(emprestimo.dataRetornoPrevisto).toLocaleDateString('pt-BR')
-                        }
-                      </p>
+              <>
+                <div className="space-y-3">
+                  {paginatedHistorico.map((emprestimo) => (
+                    <div
+                      key={emprestimo.id}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border opacity-75"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-700">{emprestimo.livro.titulo}</p>
+                        <p className="text-sm text-gray-500">
+                          Retirada: {new Date(emprestimo.dataRetirada).toLocaleDateString('pt-BR')}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Devolvido em: {emprestimo.dataRetornoOficial
+                            ? new Date(emprestimo.dataRetornoOficial).toLocaleDateString('pt-BR')
+                            : new Date(emprestimo.dataRetornoPrevisto).toLocaleDateString('pt-BR')
+                          }
+                        </p>
+                      </div>
+                      <div className="ml-4">
+                        {getStatusBadge(emprestimo)}
+                      </div>
                     </div>
-                    <div className="ml-4">
-                      {getStatusBadge(emprestimo)}
+                  ))}
+                </div>
+
+                {/* Paginação */}
+                {totalHistoricoPages > 1 && (
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                    <span className="text-sm text-gray-600">
+                      Página {historicoPage} de {totalHistoricoPages} ({emprestimosHistorico.length} registros)
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setHistoricoPage(historicoPage - 1)}
+                        disabled={historicoPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        Anterior
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setHistoricoPage(historicoPage + 1)}
+                        disabled={historicoPage === totalHistoricoPages}
+                      >
+                        Próxima
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
                     </div>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
@@ -405,7 +512,7 @@ export default function ClienteDashboard() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                     <span className="text-blue-600 font-semibold">1</span>
                   </div>
                   <div>
@@ -414,7 +521,7 @@ export default function ClienteDashboard() {
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                     <span className="text-blue-600 font-semibold">2</span>
                   </div>
                   <div>
@@ -423,7 +530,7 @@ export default function ClienteDashboard() {
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                     <span className="text-blue-600 font-semibold">3</span>
                   </div>
                   <div>
