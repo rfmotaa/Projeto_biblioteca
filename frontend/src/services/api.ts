@@ -12,6 +12,11 @@ import type {
   FuncionarioForm,
   LivroForm,
   EmprestimoForm,
+  DashboardAnalytics,
+  EmprestimosPorSemana,
+  EmprestimosStatus,
+  LivroMaisEmprestado,
+  PercentualLivros,
 } from './types';
 
 // Create axios instance with base configuration
@@ -316,6 +321,86 @@ export const emprestimosApi = {
   // Legacy method name (uses same endpoint)
   devolucao: async (id: number): Promise<Emprestimo> => {
     return emprestimosApi.finalizar(id);
+  },
+};
+
+// ============================================================
+// Dashboard Analytics API
+// ============================================================
+
+export const dashboardAnalyticsApi = {
+  /**
+   * GET /api/dashboard/analytics
+   * Retorna todos os dados consolidados do dashboard de analytics.
+   */
+  getDashboardAnalytics: async (
+    ultimasSemanas?: number,
+    topLivros?: number
+  ): Promise<DashboardAnalytics> => {
+    const params: Record<string, number> = {};
+    if (ultimasSemanas !== undefined) {
+      params.ultimasSemanas = ultimasSemanas;
+    }
+    if (topLivros !== undefined) {
+      params.topLivros = topLivros;
+    }
+
+    const response = await api.get<DashboardAnalytics>('/api/dashboard/analytics', {
+      params: Object.keys(params).length > 0 ? params : undefined,
+    });
+    return response.data;
+  },
+
+  /**
+   * GET /api/dashboard/emprestimos-por-semana
+   * Retorna a contagem de empréstimos agrupados por semana e ano.
+   */
+  getEmprestimosPorSemana: async (
+    ultimasSemanas?: number
+  ): Promise<EmprestimosPorSemana[]> => {
+    const params = ultimasSemanas !== undefined ? { ultimasSemanas } : undefined;
+    const response = await api.get<EmprestimosPorSemana[]>(
+      '/api/dashboard/emprestimos-por-semana',
+      { params }
+    );
+    return response.data;
+  },
+
+  /**
+   * GET /api/dashboard/emprestimos-status
+   * Retorna a contagem de empréstimos por status.
+   */
+  getEmprestimosStatus: async (): Promise<EmprestimosStatus> => {
+    const response = await api.get<EmprestimosStatus>(
+      '/api/dashboard/emprestimos-status'
+    );
+    return response.data;
+  },
+
+  /**
+   * GET /api/dashboard/livros-mais-emprestados
+   * Retorna o ranking dos livros mais emprestados.
+   */
+  getLivrosMaisEmprestados: async (
+    top?: number
+  ): Promise<LivroMaisEmprestado[]> => {
+    const params = top !== undefined ? { top } : undefined;
+    const response = await api.get<LivroMaisEmprestado[]>(
+      '/api/dashboard/livros-mais-emprestados',
+      { params }
+    );
+    return response.data;
+  },
+
+  /**
+   * GET /api/dashboard/percentual-livros
+   * Retorna o percentual de livros disponíveis em relação ao total.
+   */
+  getPercentualLivros: async (): Promise<PercentualLivros> => {
+    const response = await api.get<PercentualLivros>(
+      '/api/dashboard/percentual-livros'
+    );
+    return response.data;
   },
 };
 

@@ -100,3 +100,38 @@ export interface EmprestimoForm {
   dataRetirada: string;
   dataRetornoPrevisto: string;
 }
+
+// ============================================================
+// Dashboard Analytics Types
+// ============================================================
+
+export interface EmprestimosPorSemana {
+  semana: number;
+  ano: number;
+  quantidade: number;
+}
+
+export interface EmprestimosStatus {
+  solicitados: number;
+  negados: number;
+  aprovados: number;
+}
+
+export interface LivroMaisEmprestado {
+  id: number;
+  titulo: string;
+  qtdEmprestimos: number;
+}
+
+export interface PercentualLivros {
+  livrosTotais: number;
+  livrosDisponiveis: number;
+  percentual: number;
+}
+
+export interface DashboardAnalytics {
+  emprestimosPorSemana: EmprestimosPorSemana[];
+  emprestimosStatus: EmprestimosStatus;
+  livrosMaisEmprestados: LivroMaisEmprestado[];
+  percentualLivros: PercentualLivros;
+}

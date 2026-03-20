@@ -12,6 +12,7 @@ import FuncionarioCadastroPage from './pages/FuncionarioCadastroPage';
 
 // Páginas privadas - Funcionário
 import Dashboard from './pages/Dashboard';
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import LivrosPage from './pages/LivrosPage';
 import ClientesPage from './pages/ClientesPage';
 import EmprestimosPage from './pages/EmprestimosPage';
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
           {
             path: 'dashboard',
             Component: Dashboard,
+          },
+          {
+            path: 'analytics',
+            Component: AdminAnalyticsPage,
           },
           {
             path: 'livros',

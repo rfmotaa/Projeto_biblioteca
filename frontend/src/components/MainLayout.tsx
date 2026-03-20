@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
-import { Book, Users, FileText, LayoutDashboard, LogOut, Menu } from 'lucide-react';
+import { Book, Users, FileText, LayoutDashboard, LogOut, Menu, BarChart3 } from 'lucide-react';
 import { Button } from './ui/button';
 import { useState } from 'react';
 
@@ -17,6 +17,7 @@ export const MainLayout = () => {
 
   const menuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/livros', label: 'Livros', icon: Book },
     { path: '/clientes', label: 'Clientes', icon: Users },
     { path: '/emprestimos', label: 'Empréstimos', icon: FileText },
