@@ -196,13 +196,18 @@ public class EmprestimoController {
         LivroDTO livroDTO = new LivroDTO(
                 l.getId(),
                 l.getTitulo(),
+                l.getIsbn(),
+                l.getEditora(),
+                l.getEdicao(),
+                l.getAutor(),
                 l.getAnoPublicacao(),
                 l.getQntTotal(),
                 l.getQntDisponivel(),
                 l.getEmprestimos()
                         .stream()
                         .map(Emprestimo::getId)
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()),
+                null
         );
 
         return new EmprestimoDTO(
@@ -212,7 +217,9 @@ public class EmprestimoController {
                 e.getDataRetornoOficial(),
                 clienteDTO,
                 livroDTO,
-                e.getStatus()
+                e.getStatus(),
+                e.estaAtrasado(),
+                e.getNumeroRenovacoes()
         );
     }
 }

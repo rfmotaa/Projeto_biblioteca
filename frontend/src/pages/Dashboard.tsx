@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Book, Users, FileText, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Book, Users, FileText, TrendingUp, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
@@ -13,6 +13,7 @@ interface DashboardStats {
   emprestimosAtivos: number;
   livrosDisponiveis: number;
   solicitacoesPendentes: number;
+  emprestimosAtrasados: number;
 }
 
 export default function Dashboard() {
@@ -22,6 +23,7 @@ export default function Dashboard() {
     emprestimosAtivos: 0,
     livrosDisponiveis: 0,
     solicitacoesPendentes: 0,
+    emprestimosAtrasados: 0,
   });
   const [solicitacoesPendentes, setSolicitacoesPendentes] = useState<Emprestimo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,14 +39,18 @@ export default function Dashboard() {
         ]);
 
         const livrosDisponiveis = livros.filter((l) => l.qntDisponivel > 0).length;
-        const emprestimosAtivos = emprestimos.filter((e) => e.status === 'ATIVO').length;
+        const emprestimosAtivos = emprestimos.filter((e) => e.status === 'ATIVO');
+        const emprestimosAtrasados = emprestimosAtivos.filter((e) =>
+          e.estaAtrasado || new Date(e.dataRetornoPrevisto) < new Date()
+        ).length;
 
         setStats({
           totalLivros: livros.length,
           totalClientes: clientes.length,
-          emprestimosAtivos,
+          emprestimosAtivos: emprestimosAtivos.length,
           livrosDisponiveis,
           solicitacoesPendentes: pendentes.length,
+          emprestimosAtrasados,
         });
         setSolicitacoesPendentes(pendentes);
       } catch (error) {
@@ -69,12 +75,16 @@ export default function Dashboard() {
         emprestimosApi.getPendentes(),
       ]);
 
-      const emprestimosAtivos = emprestimos.filter((e) => e.status === 'ATIVO').length;
+      const emprestimosAtivos = emprestimos.filter((e) => e.status === 'ATIVO');
+      const emprestimosAtrasados = emprestimosAtivos.filter((e) =>
+        e.estaAtrasado || new Date(e.dataRetornoPrevisto) < new Date()
+      ).length;
 
       setStats((prev) => ({
         ...prev,
-        emprestimosAtivos,
+        emprestimosAtivos: emprestimosAtivos.length,
         solicitacoesPendentes: pendentes.length,
+        emprestimosAtrasados,
       }));
       setSolicitacoesPendentes(pendentes);
     } catch (error: any) {
@@ -132,6 +142,14 @@ export default function Dashboard() {
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
     },
+    {
+      title: 'Empréstimos Atrasados',
+      value: stats.emprestimosAtrasados,
+      icon: AlertCircle,
+      color: 'text-red-600',
+      bgColor: 'bg-red-100',
+      highlight: stats.emprestimosAtrasados > 0,
+    },
   ];
 
   if (isLoading) {
@@ -150,7 +168,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (

@@ -26,6 +26,8 @@ import type { Emprestimo, Livro, Cliente } from '../services/types';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
+const MAX_RENOVACOES = 2;
+
 export default function EmprestimosPage() {
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
   const [pendentes, setPendentes] = useState<Emprestimo[]>([]);
@@ -144,7 +146,18 @@ export default function EmprestimosPage() {
   };
 
   const handleRenovar = async (id: number) => {
-    if (!confirm('Deseja renovar este empréstimo por 7 dias?')) return;
+    const emprestimo = emprestimosAtivos.find(e => e.id === id);
+    if (!emprestimo) return;
+
+    const renovacoes = emprestimo.numeroRenovacoes || 0;
+
+    // Verificar limite de renovações
+    if (renovacoes >= MAX_RENOVACOES) {
+      toast.error(`Este empréstimo já atingiu o limite máximo de ${MAX_RENOVACOES} renovações.`);
+      return;
+    }
+
+    if (!confirm(`Deseja renovar este empréstimo por 7 dias? (Renovação ${renovacoes + 1} de ${MAX_RENOVACOES})`)) return;
 
     try {
       await emprestimosApi.renovar(id);
@@ -180,9 +193,8 @@ export default function EmprestimosPage() {
       case 'REJEITADO':
         return <Badge variant="destructive">Rejeitado</Badge>;
       case 'ATIVO':
-        const dataPrevista = new Date(emprestimo.dataRetornoPrevisto);
-        const hoje = new Date();
-        if (hoje > dataPrevista) {
+        // Usar campo do backend com fallback para cálculo local
+        if (emprestimo.estaAtrasado || new Date(emprestimo.dataRetornoPrevisto) < new Date()) {
           return <Badge variant="destructive">Atrasado</Badge>;
         }
         return <Badge variant="default" className="bg-green-600">Ativo</Badge>;
@@ -375,40 +387,53 @@ export default function EmprestimosPage() {
                     <TableHead>Cliente</TableHead>
                     <TableHead>Retirada</TableHead>
                     <TableHead>Devolução Prevista</TableHead>
+                    <TableHead>Renovações</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {emprestimosAtivos.map((emprestimo) => (
-                    <TableRow key={emprestimo.id}>
-                      <TableCell className="font-medium">{emprestimo.livro.titulo}</TableCell>
-                      <TableCell>{emprestimo.cliente.nome}</TableCell>
-                      <TableCell>{format(new Date(emprestimo.dataRetirada), 'dd/MM/yyyy')}</TableCell>
-                      <TableCell>{format(new Date(emprestimo.dataRetornoPrevisto), 'dd/MM/yyyy')}</TableCell>
-                      <TableCell>{getStatusBadge(emprestimo)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRenovar(emprestimo.id)}
-                            title="Renovar (+7 dias)"
-                          >
-                            <RotateCcw className="h-4 w-4 text-blue-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleFinalizar(emprestimo.id)}
-                            title="Finalizar empréstimo"
-                          >
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {emprestimosAtivos.map((emprestimo) => {
+                    const renovacoes = emprestimo.numeroRenovacoes || 0;
+                    const podeRenovar = renovacoes < MAX_RENOVACOES;
+
+                    return (
+                      <TableRow key={emprestimo.id}>
+                        <TableCell className="font-medium">{emprestimo.livro.titulo}</TableCell>
+                        <TableCell>{emprestimo.cliente.nome}</TableCell>
+                        <TableCell>{format(new Date(emprestimo.dataRetirada), 'dd/MM/yyyy')}</TableCell>
+                        <TableCell>{format(new Date(emprestimo.dataRetornoPrevisto), 'dd/MM/yyyy')}</TableCell>
+                        <TableCell>
+                          <Badge variant={renovacoes === 0 ? 'secondary' : 'default'} className="text-xs">
+                            {renovacoes}/{MAX_RENOVACOES}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(emprestimo)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRenovar(emprestimo.id)}
+                              title={podeRenovar ? `Renovar (+7 dias) - Renovação ${renovacoes + 1} de ${MAX_RENOVACOES}` : 'Limite de renovações atingido'}
+                              disabled={!podeRenovar}
+                              className={!podeRenovar ? 'opacity-50 cursor-not-allowed' : ''}
+                            >
+                              <RotateCcw className={`h-4 w-4 ${podeRenovar ? 'text-blue-600' : 'text-gray-400'}`} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleFinalizar(emprestimo.id)}
+                              title="Finalizar empréstimo"
+                            >
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

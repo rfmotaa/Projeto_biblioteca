@@ -17,6 +17,7 @@ import type {
   EmprestimosStatus,
   LivroMaisEmprestado,
   PercentualLivros,
+  Categoria,
 } from './types';
 
 // Create axios instance with base configuration
@@ -168,12 +169,16 @@ export const livrosApi = {
   },
 
   create: async (data: LivroForm): Promise<Livro> => {
-    // Backend expects qntDisponivel field, which should default to qntTotal
     const response = await api.post<Livro>('/livros', {
       titulo: data.titulo,
+      isbn: data.isbn || undefined,
+      editora: data.editora || undefined,
+      edicao: data.edicao || 1,
+      autor: data.autor,
       anoPublicacao: data.anoPublicacao,
       qntTotal: data.qntTotal,
       qntDisponivel: data.qntTotal, // Default available to total quantity
+      categoriaIds: data.categoriaIds,
     });
     return response.data;
   },
@@ -198,9 +203,14 @@ export const livrosApi = {
     // Send all fields
     const response = await api.put<Livro>(`/livros/${id}`, {
       titulo: data.titulo ?? existing.titulo,
+      isbn: data.isbn !== undefined ? data.isbn : existing.isbn,
+      editora: data.editora !== undefined ? data.editora : existing.editora,
+      edicao: data.edicao !== undefined ? data.edicao : existing.edicao,
+      autor: data.autor ?? existing.autor,
       anoPublicacao: data.anoPublicacao ?? existing.anoPublicacao,
       qntTotal: newTotal,
       qntDisponivel: finalAvailable,
+      categoriaIds: data.categoriaIds,
     });
     return response.data;
   },
@@ -227,6 +237,62 @@ export const livrosApi = {
   getIndisponiveis: async (): Promise<Livro[]> => {
     const response = await api.get<Livro[]>('/livros/indisponiveis');
     return response.data;
+  },
+
+  // Novos métodos de busca
+  getByAutor: async (autor: string): Promise<Livro[]> => {
+    const response = await api.get<Livro[]>('/livros/autor', { params: { autor } });
+    return response.data;
+  },
+
+  getByEditora: async (editora: string): Promise<Livro[]> => {
+    const response = await api.get<Livro[]>('/livros/editora', { params: { editora } });
+    return response.data;
+  },
+
+  getByIsbn: async (isbn: string): Promise<Livro> => {
+    const response = await api.get<Livro>('/livros/isbn', { params: { isbn } });
+    return response.data;
+  },
+
+  getByCategoria: async (categoriaNome: string): Promise<Livro[]> => {
+    const response = await api.get<Livro[]>(`/livros/categoria/${categoriaNome}`);
+    return response.data;
+  },
+};
+
+// ============================================================
+// CATEGORIAS API
+// ============================================================
+
+export const categoriasApi = {
+  getAll: async (): Promise<Categoria[]> => {
+    const response = await api.get<Categoria[]>('/categorias');
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<Categoria> => {
+    const response = await api.get<Categoria>(`/categorias/${id}`);
+    return response.data;
+  },
+
+  getByNome: async (nome: string): Promise<Categoria> => {
+    const response = await api.get<Categoria>(`/categorias/nome/${nome}`);
+    return response.data;
+  },
+
+  create: async (nome: string): Promise<Categoria> => {
+    const response = await api.post<Categoria>('/categorias', { nome });
+    return response.data;
+  },
+
+  update: async (id: number, nome: string): Promise<Categoria> => {
+    const response = await api.put<Categoria>(`/categorias/${id}`, { nome });
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/categorias/${id}`);
   },
 };
 
@@ -400,6 +466,54 @@ export const dashboardAnalyticsApi = {
     const response = await api.get<PercentualLivros>(
       '/api/dashboard/percentual-livros'
     );
+    return response.data;
+  },
+};
+
+// ============================================================
+// NOTIFICAÇÕES API
+// ============================================================
+
+export const notificacoesApi = {
+  getNaoLidas: async (clienteId: number): Promise<Notificacao[]> => {
+    const response = await api.get<Notificacao[]>(`/notificacoes/cliente/${clienteId}`);
+    return response.data;
+  },
+
+  contarNaoLidas: async (clienteId: number): Promise<number> => {
+    const response = await api.get<number>(`/notificacoes/cliente/${clienteId}/contar`);
+    return response.data;
+  },
+
+  marcarComoLida: async (notificacaoId: number): Promise<void> => {
+    await api.patch(`/notificacoes/${notificacaoId}/marcar-lida`);
+  },
+
+  marcarTodasComoLidas: async (clienteId: number): Promise<void> => {
+    await api.patch(`/notificacoes/cliente/${clienteId}/marcar-todas-lidas`);
+  },
+};
+
+// ============================================================
+// INTERESSES API
+// ============================================================
+
+export const interessesApi = {
+  adicionarInteresse: async (clienteId: number, livroId: number): Promise<void> => {
+    await api.post(`/interesses/cliente/${clienteId}`, { livroId });
+  },
+
+  removerInteresse: async (clienteId: number, livroId: number): Promise<void> => {
+    await api.delete(`/interesses/cliente/${clienteId}/livro/${livroId}`);
+  },
+
+  listarInteresses: async (clienteId: number): Promise<LivroInteresse[]> => {
+    const response = await api.get<LivroInteresse[]>(`/interesses/cliente/${clienteId}`);
+    return response.data;
+  },
+
+  verificarInteresse: async (clienteId: number, livroId: number): Promise<boolean> => {
+    const response = await api.get<boolean>(`/interesses/cliente/${clienteId}/verificar/${livroId}`);
     return response.data;
   },
 };

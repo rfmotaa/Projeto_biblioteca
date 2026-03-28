@@ -41,6 +41,9 @@ public class Emprestimo {
     @Column(name = "status", nullable = false)
     private StatusEmprestimo status = StatusEmprestimo.PENDENTE;
 
+    @Column(name = "numero_renovacoes")
+    private int numeroRenovacoes = 0;
+
     public enum StatusEmprestimo {
         PENDENTE,
         APROVADO,
@@ -81,9 +84,33 @@ public class Emprestimo {
     public StatusEmprestimo getStatus() { return status; }
     public void setStatus(StatusEmprestimo status) { this.status = status; }
 
+    public int getNumeroRenovacoes() { return numeroRenovacoes; }
+    public void setNumeroRenovacoes(int numeroRenovacoes) { this.numeroRenovacoes = numeroRenovacoes; }
+
     public void renovacao() {
         if (this.dataRetornoPrevisto != null) {
             this.dataRetornoPrevisto = this.dataRetornoPrevisto.plusDays(7);
         }
+    }
+
+    /**
+     * Verifica se o empréstimo está atrasado
+     * Um empréstimo está atrasado se:
+     * - Status é ATIVO
+     * - Data de retorno prevista é anterior a hoje
+     */
+    public boolean estaAtrasado() {
+        return this.status == StatusEmprestimo.ATIVO &&
+               this.dataRetornoPrevisto != null &&
+               this.dataRetornoPrevisto.isBefore(LocalDate.now());
+    }
+
+    /**
+     * Verifica se o empréstimo pode ser renovado
+     * @param maxRenovacoes número máximo de renovações permitidas
+     * @return true se ainda pode renovar, false se atingiu o limite
+     */
+    public boolean podeRenovar(int maxRenovacoes) {
+        return this.numeroRenovacoes < maxRenovacoes;
     }
 }

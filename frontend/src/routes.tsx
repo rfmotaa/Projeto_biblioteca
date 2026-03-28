@@ -19,6 +19,7 @@ import EmprestimosPage from './pages/EmprestimosPage';
 
 // Páginas privadas - Cliente
 import ClienteDashboard from './pages/ClienteDashboard';
+import ListaInteressesPage from './pages/ListaInteressesPage';
 
 export const router = createBrowserRouter([
   {
@@ -80,6 +81,10 @@ export const router = createBrowserRouter([
       {
         path: 'cliente/dashboard',
         Component: ClienteDashboard,
+      },
+      {
+        path: 'cliente/interesses',
+        Component: ListaInteressesPage,
       },
     ],
   },

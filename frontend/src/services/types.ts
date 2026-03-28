@@ -21,21 +21,36 @@ export interface Funcionario {
   login: string;
 }
 
+export interface Categoria {
+  id: number;
+  nome: string;
+}
+
 export interface Livro {
   id: number;
   titulo: string;
+  isbn?: string;
+  editora?: string;
+  edicao?: number;
+  autor: string;
   anoPublicacao: number;
   qntTotal: number;
   qntDisponivel: number;
+  categorias?: Categoria[];
 }
 
 export interface LivroDTO {
   id: number;
   titulo: string;
+  isbn?: string;
+  editora?: string;
+  edicao?: number;
+  autor: string;
   anoPublicacao: number;
   qntTotal: number;
   qntDisponivel: number;
   emprestimosIds: number[];
+  categorias?: Categoria[];
 }
 
 export type StatusEmprestimo = 'PENDENTE' | 'APROVADO' | 'REJEITADO' | 'ATIVO' | 'FINALIZADO';
@@ -48,6 +63,8 @@ export interface Emprestimo {
   cliente: ClienteDTO;
   livro: LivroDTO;
   status?: StatusEmprestimo;
+  estaAtrasado?: boolean;
+  numeroRenovacoes?: number;
 }
 
 export interface LoginRequest {
@@ -83,15 +100,25 @@ export interface FuncionarioForm {
 
 export interface LivroForm {
   titulo: string;
+  isbn?: string;
+  editora?: string;
+  edicao?: number;
+  autor: string;
   anoPublicacao: number;
   qntTotal: number;
+  categoriaIds?: number[];
 }
 
 export interface LivroUpdateForm {
   titulo?: string;
+  isbn?: string;
+  editora?: string;
+  edicao?: number;
+  autor?: string;
   anoPublicacao?: number;
   qntTotal?: number;
   qntDisponivel?: number;
+  categoriaIds?: number[];
 }
 
 export interface EmprestimoForm {
@@ -115,6 +142,7 @@ export interface EmprestimosStatus {
   solicitados: number;
   negados: number;
   aprovados: number;
+  atrasados: number;
 }
 
 export interface LivroMaisEmprestado {
@@ -134,4 +162,30 @@ export interface DashboardAnalytics {
   emprestimosStatus: EmprestimosStatus;
   livrosMaisEmprestados: LivroMaisEmprestado[];
   percentualLivros: PercentualLivros;
+}
+
+// ============================================================
+// Notificações e Lista de Interesse Types
+// ============================================================
+
+export type TipoNotificacao = 'VENCIMENTO_PROXIMO' | 'LIVRO_DISPONIVEL';
+
+export interface Notificacao {
+  id: number;
+  mensagem: string;
+  tipoNotificacao: TipoNotificacao;
+  lida: boolean;
+  dataCriacao: string;
+  livro?: Livro;
+}
+
+export interface LivroInteresse {
+  id: number;
+  cliente: ClienteDTO;
+  livro: LivroDTO;
+  dataCriacao: string;
+}
+
+export interface LivroInteresseRequest {
+  livroId: number;
 }

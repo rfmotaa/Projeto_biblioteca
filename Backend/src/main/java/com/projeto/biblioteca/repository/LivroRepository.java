@@ -15,6 +15,12 @@ public interface LivroRepository extends JpaRepository<Livro, Integer> {
     List<Livro> findByQntDisponivelGreaterThan(int quantidade);
     List<Livro> findByQntDisponivelLessThan(int quantidade);
 
+    List<Livro> findByAutorContainingIgnoreCase(String autor);
+    List<Livro> findByEditoraContainingIgnoreCase(String editora);
+    Livro findByIsbn(String isbn);
+    List<Livro> findByCategoriasNome(String categoriaNome);
+    boolean existsByIsbn(String isbn);
+
     // ========== Queries para Dashboard Analytics ==========
 
     @Query("SELECT SUM(l.qntTotal) FROM Livro l")

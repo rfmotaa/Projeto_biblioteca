@@ -1,12 +1,12 @@
 package com.projeto.biblioteca.service;
 
 import com.projeto.biblioteca.dto.*;
-import com.projeto.biblioteca.model.Emprestimo;
 import com.projeto.biblioteca.repository.EmprestimoRepository;
 import com.projeto.biblioteca.repository.LivroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,14 +47,15 @@ public class DashboardAnalyticsService {
 
     /**
      * Busca contagem de empréstimos por status
-     * @return DTO com solicitados, negados e aprovados
+     * @return DTO com solicitados, negados, aprovados e atrasados
      */
     public EmprestimosStatusDTO getEmprestimosPorStatus() {
         long solicitados = emprestimoRepository.countSolicitados();
         long negados = emprestimoRepository.countNegados();
         long aprovados = emprestimoRepository.countAprovados();
+        long atrasados = emprestimoRepository.countAtrasados(LocalDate.now());
 
-        return new EmprestimosStatusDTO(solicitados, negados, aprovados);
+        return new EmprestimosStatusDTO(solicitados, negados, aprovados, atrasados);
     }
 
     /**

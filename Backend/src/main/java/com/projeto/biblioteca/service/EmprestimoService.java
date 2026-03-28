@@ -26,6 +26,12 @@ public class EmprestimoService {
     @Autowired
     private LivroRepository livroRepository;
 
+    @Autowired
+    private LivroInteresseService livroInteresseService;
+
+    @Autowired
+    private NotificacaoService notificacaoService;
+
     // Constantes de regras de negócio
     private static final int MAX_EMPRESTIMOS_ATIVOS = 3;
     private static final int DIAS_EMPRESTIMO_SOLICITACAO = 7;
@@ -143,6 +149,7 @@ public class EmprestimoService {
      * ADMIN: Aprova uma solicitação pendente (PENDENTE → ATIVO)
      * - Reserva o livro (reduz qntDisponivel)
      * - Define data de devolução
+     * - Remove livro da lista de interesse do cliente
      */
     @Transactional
     public Emprestimo aprovarSolicitacao(Integer id) {
@@ -162,6 +169,12 @@ public class EmprestimoService {
         emprestimo.setStatus(Emprestimo.StatusEmprestimo.ATIVO);
         livro.emprestar();
         livroRepository.save(livro);
+
+        // Remover da lista de interesse se existir
+        livroInteresseService.removerInteresseQuandoAlugado(
+            emprestimo.getCliente().getId(),
+            livro.getId()
+        );
 
         return emprestimoRepository.save(emprestimo);
     }
@@ -229,6 +242,9 @@ public class EmprestimoService {
         livro.emprestar();
         livroRepository.save(livro);
 
+        // Remover da lista de interesse se existir
+        livroInteresseService.removerInteresseQuandoAlugado(clienteId, livro.getId());
+
         return emprestimoRepository.save(emprestimo);
     }
 
@@ -240,7 +256,7 @@ public class EmprestimoService {
      * ADMIN: Renova um empréstimo ativo
      * - Adiciona 7 dias ao prazo
      * - Pode renovar se não estiver atrasado
-     * - Limite de renovações
+     * - Limite máximo de renovações
      */
     @Transactional
     public Emprestimo renovar(Integer id) {
@@ -255,10 +271,15 @@ public class EmprestimoService {
             throw new RuntimeException("Não é possível renovar empréstimo atrasado.");
         }
 
-        // TODO: Adicionar contador de renovações no model se necessário
-        // Por enquanto, permite renovação ilimitada
+        // Verificar limite de renovações
+        if (!emprestimo.podeRenovar(MAX_RENOVACOES)) {
+            throw new RuntimeException(
+                String.format("Este empréstimo já atingiu o limite máximo de %d renovações.", MAX_RENOVACOES)
+            );
+        }
 
-        // Renovar (adicionar dias)
+        // Incrementar contador e adicionar dias
+        emprestimo.setNumeroRenovacoes(emprestimo.getNumeroRenovacoes() + 1);
         emprestimo.setDataRetornoPrevisto(
             emprestimo.getDataRetornoPrevisto().plusDays(DIAS_RENOVACAO)
         );
@@ -295,6 +316,19 @@ public class EmprestimoService {
         Livro livro = emprestimo.getLivro();
         livro.devolver();
         livroRepository.save(livro);
+
+        // Notificar clientes interessados neste livro (se agora está disponível)
+        if (livro.disponivel()) {
+            List<Cliente> clientesInteressados = livroInteresseService.listarClientesInteressados(livro.getId());
+            for (Cliente cliente : clientesInteressados) {
+                try {
+                    notificacaoService.criarNotificacaoLivroDisponivel(cliente.getId(), livro.getId());
+                } catch (Exception e) {
+                    // Log error but continue processing other clients
+                    System.err.println("Erro ao criar notificação para cliente " + cliente.getId() + ": " + e.getMessage());
+                }
+            }
+        }
 
         return emprestimoRepository.save(emprestimo);
     }

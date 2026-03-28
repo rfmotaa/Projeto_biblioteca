@@ -59,4 +59,11 @@ public interface EmprestimoRepository extends JpaRepository<Emprestimo, Integer>
 
     @Query("SELECT COUNT(e) FROM Emprestimo e WHERE e.status = 'APROVADO' OR e.status = 'ATIVO' OR e.status = 'FINALIZADO'")
     long countAprovados();
+
+    @Query("SELECT COUNT(e) FROM Emprestimo e WHERE e.status = 'ATIVO' AND e.dataRetornoPrevisto < :dataAtual")
+    long countAtrasados(@org.springframework.data.repository.query.Param("dataAtual") LocalDate dataAtual);
+
+    @Query("SELECT e FROM Emprestimo e WHERE e.status = 'ATIVO' AND e.dataRetornoPrevisto BETWEEN :dataInicio AND :dataFim")
+    List<Emprestimo> findActiveLoansExpiringSoon(@org.springframework.data.repository.query.Param("dataInicio") LocalDate dataInicio,
+                                                  @org.springframework.data.repository.query.Param("dataFim") LocalDate dataFim);
 }
